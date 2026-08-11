@@ -49,11 +49,46 @@ pub struct BrowserProfile {
 
 struct Candidate {
     browser: &'static str,
-    /// (base dir kind, relative path). `true` = roaming appdata, `false` = local.
+    /// `true` = roaming appdata (%APPDATA%), `false` = local (%LOCALAPPDATA%).
     roaming: bool,
     rel: &'static str,
-    /// Chrome-style: profiles are subfolders and Local State is the parent.
-    chrome_style: bool,
+}
+
+/// Find the directories that actually hold `Login Data` under `root`.
+///
+/// Layout is **detected, not assumed**. Older Opera keeps `Login Data` flat in
+/// the profile root; current Opera GX has migrated to Chrome's `Default\`
+/// subfolder while leaving `Local State` in the parent. Hard-coding either one
+/// silently reports "no saved passwords" on half the installs out there — which
+/// is the single worst way for this tool to fail, because the user finds out
+/// after the disk is wiped.
+fn discover_profiles(root: &Path) -> Vec<(String, PathBuf)> {
+    // 1. Flat layout: Login Data sits directly in the root.
+    if root.join("Login Data").is_file() {
+        return vec![("Default".to_string(), root.to_path_buf())];
+    }
+
+    // 2. Chrome layout: Default\ and Profile N\ subfolders.
+    let mut found = Vec::new();
+    if root.join("Default").is_dir() {
+        found.push(("Default".to_string(), root.join("Default")));
+    }
+    if let Ok(rd) = std::fs::read_dir(root) {
+        let mut extra: Vec<(String, PathBuf)> = rd
+            .flatten()
+            .filter(|e| e.path().is_dir())
+            .map(|e| (e.file_name().to_string_lossy().into_owned(), e.path()))
+            .filter(|(n, _)| n.starts_with("Profile "))
+            .collect();
+        extra.sort_by(|a, b| a.0.cmp(&b.0));
+        found.extend(extra);
+    }
+    if !found.is_empty() {
+        return found;
+    }
+
+    // 3. Neither: report the root so the UI still shows the browser exists.
+    vec![("Default".to_string(), root.to_path_buf())]
 }
 
 const CHROMIUM: &[Candidate] = &[
@@ -61,49 +96,41 @@ const CHROMIUM: &[Candidate] = &[
         browser: "Opera GX",
         roaming: true,
         rel: r"Opera Software\Opera GX Stable",
-        chrome_style: false,
     },
     Candidate {
         browser: "Opera",
         roaming: true,
         rel: r"Opera Software\Opera Stable",
-        chrome_style: false,
     },
     Candidate {
         browser: "Opera Air",
         roaming: true,
         rel: r"Opera Software\Opera Air Stable",
-        chrome_style: false,
     },
     Candidate {
         browser: "Google Chrome",
         roaming: false,
         rel: r"Google\Chrome\User Data",
-        chrome_style: true,
     },
     Candidate {
         browser: "Microsoft Edge",
         roaming: false,
         rel: r"Microsoft\Edge\User Data",
-        chrome_style: true,
     },
     Candidate {
         browser: "Brave",
         roaming: false,
         rel: r"BraveSoftware\Brave-Browser\User Data",
-        chrome_style: true,
     },
     Candidate {
         browser: "Vivaldi",
         roaming: false,
         rel: r"Vivaldi\User Data",
-        chrome_style: true,
     },
     Candidate {
         browser: "Chromium",
         roaming: false,
         rel: r"Chromium\User Data",
-        chrome_style: true,
     },
 ];
 
@@ -162,23 +189,7 @@ pub fn detect_all() -> Vec<BrowserProfile> {
             .map(|b| b.join(c.rel))
             .filter(|p| p.is_dir());
 
-        let profile_dirs: Vec<(String, PathBuf)> = if c.chrome_style {
-            let mut v = Vec::new();
-            if root.join("Default").is_dir() {
-                v.push(("Default".to_string(), root.join("Default")));
-            }
-            if let Ok(rd) = std::fs::read_dir(&root) {
-                for e in rd.flatten() {
-                    let name = e.file_name().to_string_lossy().to_string();
-                    if name.starts_with("Profile ") && e.path().is_dir() {
-                        v.push((name, e.path()));
-                    }
-                }
-            }
-            v
-        } else {
-            vec![("Default".to_string(), root.clone())]
-        };
+        let profile_dirs = discover_profiles(&root);
 
         for (profile, data_dir) in profile_dirs {
             let local_state = find_local_state(&data_dir);
@@ -201,9 +212,19 @@ pub fn detect_all() -> Vec<BrowserProfile> {
                 );
             }
             if c.browser.starts_with("Opera") {
-                notes.push(
-                    "Opera keeps `Local State` inside the profile folder, not its parent.".into(),
-                );
+                notes.push(format!(
+                    "Opera layout detected as {}: Login Data in {}, Local State in {}.",
+                    if data_dir == root {
+                        "flat"
+                    } else {
+                        "Chrome-style (Default\\)"
+                    },
+                    data_dir.display(),
+                    local_state
+                        .as_deref()
+                        .and_then(|p| Path::new(p).parent().map(|d| d.display().to_string()))
+                        .unwrap_or_else(|| "not found".into())
+                ));
             }
 
             out.push(BrowserProfile {
@@ -302,6 +323,47 @@ mod tests {
         std::fs::remove_file(profile.join("Local State")).unwrap();
         // Falls back to the parent, which is the Chrome layout.
         assert_eq!(find_local_state(&profile).unwrap(), tmp.join("Local State"));
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn detects_both_opera_layouts() {
+        let tmp = std::env::temp_dir().join(format!("prb-layout-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+
+        // Flat: Login Data directly in the profile root (older Opera).
+        let flat = tmp.join("flat");
+        std::fs::create_dir_all(&flat).unwrap();
+        std::fs::write(flat.join("Login Data"), b"x").unwrap();
+        let p = discover_profiles(&flat);
+        assert_eq!(p.len(), 1);
+        assert_eq!(p[0].1, flat);
+
+        // Chrome-style: Default\Login Data with Local State in the parent.
+        // Current Opera GX ships this layout; assuming "flat" here is what made
+        // a real install report "no saved passwords".
+        let chromed = tmp.join("chromed");
+        std::fs::create_dir_all(chromed.join("Default")).unwrap();
+        std::fs::create_dir_all(chromed.join("Profile 2")).unwrap();
+        std::fs::write(chromed.join("Local State"), "{}").unwrap();
+        std::fs::write(chromed.join("Default").join("Login Data"), b"x").unwrap();
+        let p = discover_profiles(&chromed);
+        assert_eq!(p.len(), 2, "Default + Profile 2");
+        assert_eq!(p[0].1, chromed.join("Default"));
+        assert_eq!(
+            find_local_state(&p[0].1).unwrap(),
+            chromed.join("Local State"),
+            "Local State must be found in the parent for the Chrome layout"
+        );
+
+        // Neither: still report the root so the browser shows up in the UI.
+        let empty = tmp.join("empty");
+        std::fs::create_dir_all(&empty).unwrap();
+        assert_eq!(
+            discover_profiles(&empty),
+            vec![("Default".to_string(), empty)]
+        );
+
         let _ = std::fs::remove_dir_all(&tmp);
     }
 
