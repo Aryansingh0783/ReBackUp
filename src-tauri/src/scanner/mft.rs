@@ -37,15 +37,15 @@ use std::ffi::c_void;
 use windows::core::PCWSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE, LUID};
 use windows::Win32::Security::{
-    AdjustTokenPrivileges, GetTokenInformation, LookupPrivilegeValueW, OpenProcessToken,
-    TokenElevation, LUID_AND_ATTRIBUTES, SE_PRIVILEGE_ENABLED, TOKEN_ADJUST_PRIVILEGES,
-    TOKEN_ELEVATION, TOKEN_PRIVILEGES, TOKEN_QUERY,
+    AdjustTokenPrivileges, GetTokenInformation, LookupPrivilegeValueW, TokenElevation,
+    LUID_AND_ATTRIBUTES, SE_PRIVILEGE_ENABLED, TOKEN_ADJUST_PRIVILEGES, TOKEN_ELEVATION,
+    TOKEN_PRIVILEGES, TOKEN_QUERY,
 };
 use windows::Win32::Storage::FileSystem::{
     CreateFileW, ReadFile, SetFilePointerEx, FILE_ATTRIBUTE_NORMAL, FILE_BEGIN, FILE_SHARE_READ,
     FILE_SHARE_WRITE, OPEN_EXISTING,
 };
-use windows::Win32::System::Threading::GetCurrentProcess;
+use windows::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
 
 /// `GENERIC_READ`. Hard-coded rather than imported because the constant has
 /// moved between `windows` crate major versions.
@@ -238,7 +238,7 @@ unsafe fn enable_privilege(name: &str) -> bool {
         // don't check that — CreateFileW is the real authority on access.
         result = AdjustTokenPrivileges(
             token,
-            false.into(),
+            false,
             Some(&tp as *const TOKEN_PRIVILEGES),
             0,
             None,
@@ -344,7 +344,10 @@ fn decode_runs(buf: &[u8]) -> Vec<RunEntry> {
         i += len_sz;
 
         if off_sz == 0 {
-            runs.push(RunEntry { lcn: None, clusters });
+            runs.push(RunEntry {
+                lcn: None,
+                clusters,
+            });
             continue;
         }
 
@@ -416,9 +419,8 @@ fn parse_record(rec: &[u8], record_no: u32) -> Option<RawEntry> {
                 let voff = u16::from_le_bytes([rec[off + 0x14], rec[off + 0x15]]) as usize;
                 let v = off + voff;
                 if v + 24 <= limit {
-                    mtime = filetime_to_unix(u64::from_le_bytes(
-                        rec[v + 8..v + 16].try_into().ok()?,
-                    ));
+                    mtime =
+                        filetime_to_unix(u64::from_le_bytes(rec[v + 8..v + 16].try_into().ok()?));
                 }
             }
             ATTR_ATTRIBUTE_LIST => saw_attribute_list = true,
@@ -432,7 +434,9 @@ fn parse_record(rec: &[u8], record_no: u32) -> Option<RawEntry> {
                     let nstart = v + 0x42;
                     if nstart + nlen * 2 <= limit {
                         let units: Vec<u16> = (0..nlen)
-                            .map(|k| u16::from_le_bytes([rec[nstart + k * 2], rec[nstart + k * 2 + 1]]))
+                            .map(|k| {
+                                u16::from_le_bytes([rec[nstart + k * 2], rec[nstart + k * 2 + 1]])
+                            })
                             .collect();
                         let name = String::from_utf16_lossy(&units);
                         // Namespace preference: Win32&DOS(3) > Win32(1) > POSIX(0) > DOS(2).
@@ -444,27 +448,29 @@ fn parse_record(rec: &[u8], record_no: u32) -> Option<RawEntry> {
                         };
                         if best_name
                             .as_ref()
-                            .map_or(true, |(cur, _)| rank(namespace) > rank(*cur))
+                            .is_none_or(|(cur, _)| rank(namespace) > rank(*cur))
                         {
                             best_name = Some((namespace, name));
                             parent = (pref & 0x0000_FFFF_FFFF_FFFF) as u32;
                         }
-                        fn_size = fn_size.max(u64::from_le_bytes(
-                            rec[v + 0x30..v + 0x38].try_into().ok()?,
-                        ));
+                        fn_size = fn_size
+                            .max(u64::from_le_bytes(rec[v + 0x30..v + 0x38].try_into().ok()?));
                     }
                 }
             }
             ATTR_DATA if name_len == 0 => {
                 // Unnamed $DATA only — named streams are ADS and don't count.
                 if non_resident {
-                    let start_vcn = u64::from_le_bytes(rec[off + 0x10..off + 0x18].try_into().ok()?);
+                    let start_vcn =
+                        u64::from_le_bytes(rec[off + 0x10..off + 0x18].try_into().ok()?);
                     // Real size lives only in the *first* extent's header.
                     if start_vcn == 0 && off + 0x38 <= limit {
-                        data_alloc =
-                            Some(u64::from_le_bytes(rec[off + 0x28..off + 0x30].try_into().ok()?));
-                        data_size =
-                            Some(u64::from_le_bytes(rec[off + 0x30..off + 0x38].try_into().ok()?));
+                        data_alloc = Some(u64::from_le_bytes(
+                            rec[off + 0x28..off + 0x30].try_into().ok()?,
+                        ));
+                        data_size = Some(u64::from_le_bytes(
+                            rec[off + 0x30..off + 0x38].try_into().ok()?,
+                        ));
                     }
                 } else {
                     let vlen = u32::from_le_bytes(rec[off + 0x10..off + 0x14].try_into().ok()?);
@@ -494,7 +500,11 @@ fn parse_record(rec: &[u8], record_no: u32) -> Option<RawEntry> {
         parent,
         name,
         size,
-        allocated: if is_dir { 0 } else { data_alloc.unwrap_or(size) },
+        allocated: if is_dir {
+            0
+        } else {
+            data_alloc.unwrap_or(size)
+        },
         mtime,
         is_dir,
     })
@@ -621,7 +631,10 @@ fn extract_mft_runs(rec: &[u8]) -> Option<Vec<RunEntry>> {
 /// Total/free bytes for a volume, used by the drive picker.
 pub fn volume_geometry(letter: char) -> AppResult<(u64, u32)> {
     let vol = Volume::open(letter)?;
-    Ok((vol.total_clusters * vol.cluster_size as u64, vol.cluster_size))
+    Ok((
+        vol.total_clusters * vol.cluster_size as u64,
+        vol.cluster_size,
+    ))
 }
 
 #[cfg(test)]

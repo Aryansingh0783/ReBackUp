@@ -134,7 +134,10 @@ pub fn master_key(local_state: &Path) -> AppResult<Zeroizing<Vec<u8>>> {
         .pointer("/os_crypt/encrypted_key")
         .and_then(|v| v.as_str())
         .ok_or_else(|| {
-            AppError::Parse("Local State has no os_crypt.encrypted_key (profile never saved a password?)".into())
+            AppError::Parse(
+                "Local State has no os_crypt.encrypted_key (profile never saved a password?)"
+                    .into(),
+            )
         })?;
 
     let blob = B64
@@ -185,7 +188,9 @@ fn decrypt_value(key: &[u8], blob: &[u8]) -> AppResult<Decrypted> {
         let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(key));
         let pt = cipher
             .decrypt(Nonce::from_slice(&blob[3..15]), &blob[15..])
-            .map_err(|_| AppError::Crypto("AES-GCM authentication failed on a password row".into()))?;
+            .map_err(|_| {
+                AppError::Crypto("AES-GCM authentication failed on a password row".into())
+            })?;
         let s = String::from_utf8(pt)
             .map_err(|_| AppError::Crypto("decrypted password is not valid UTF-8".into()))?;
         return Ok(Decrypted::Value(Zeroizing::new(s)));
@@ -357,7 +362,10 @@ mod tests {
 
     #[test]
     fn derives_a_display_name_from_the_origin() {
-        assert_eq!(host_of("https://accounts.google.com/signin"), "accounts.google.com");
+        assert_eq!(
+            host_of("https://accounts.google.com/signin"),
+            "accounts.google.com"
+        );
         assert_eq!(host_of("android://abc@com.example/"), "abc@com.example");
     }
 

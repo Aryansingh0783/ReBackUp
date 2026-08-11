@@ -48,11 +48,15 @@ impl ScanIndex {
     }
     #[inline]
     pub fn is_live(&self, i: u32) -> bool {
-        self.flags.get(i as usize).is_some_and(|f| f & FLAG_LIVE != 0)
+        self.flags
+            .get(i as usize)
+            .is_some_and(|f| f & FLAG_LIVE != 0)
     }
     #[inline]
     pub fn is_dir(&self, i: u32) -> bool {
-        self.flags.get(i as usize).is_some_and(|f| f & FLAG_DIR != 0)
+        self.flags
+            .get(i as usize)
+            .is_some_and(|f| f & FLAG_DIR != 0)
     }
 
     /// Reconstruct the absolute path of `i` by walking to the root.
@@ -61,9 +65,13 @@ impl ScanIndex {
         let mut cur = i;
         let mut depth = 0;
         while cur != self.root && cur != u32::MAX && depth < MAX_DEPTH {
-            let Some(n) = self.name.get(cur as usize) else { break };
+            let Some(n) = self.name.get(cur as usize) else {
+                break;
+            };
             parts.push(n);
-            let Some(&p) = self.parent.get(cur as usize) else { break };
+            let Some(&p) = self.parent.get(cur as usize) else {
+                break;
+            };
             if p == cur {
                 break; // self-parent: corrupt record
             }
@@ -116,9 +124,9 @@ impl ScanIndex {
         }
         self.child_off = vec![0u32; n + 1];
         let mut acc = 0u32;
-        for i in 0..n {
-            self.child_off[i] = acc;
-            acc += counts[i];
+        for (off, cnt) in self.child_off.iter_mut().zip(counts.iter()).take(n) {
+            *off = acc;
+            acc += *cnt;
         }
         self.child_off[n] = acc;
 
@@ -315,7 +323,12 @@ impl ScanIndex {
             .path_regex
             .as_deref()
             .filter(|s| !s.is_empty())
-            .and_then(|s| regex::RegexBuilder::new(s).case_insensitive(true).build().ok());
+            .and_then(|s| {
+                regex::RegexBuilder::new(s)
+                    .case_insensitive(true)
+                    .build()
+                    .ok()
+            });
         let needle = f.contains.as_deref().map(str::to_lowercase);
         let exts: Vec<String> = f
             .extensions
@@ -398,7 +411,9 @@ impl ScanIndex {
                     self.size[i]
                 })
             }),
-            SortKey::Modified => hits.sort_unstable_by_key(|&i| std::cmp::Reverse(self.mtime[i as usize])),
+            SortKey::Modified => {
+                hits.sort_unstable_by_key(|&i| std::cmp::Reverse(self.mtime[i as usize]))
+            }
             SortKey::Name => hits.sort_unstable_by(|&a, &b| {
                 self.name[a as usize]
                     .to_lowercase()
@@ -565,7 +580,10 @@ mod tests {
     #[test]
     fn restricts_query_to_a_subtree() {
         let ix = sample();
-        let f = FileFilter { under: Some(1), ..Default::default() };
+        let f = FileFilter {
+            under: Some(1),
+            ..Default::default()
+        };
         let r = ix.query(&f, SortKey::Size, true, 0, 100);
         assert_eq!(r.total_matches, 2);
         assert_eq!(r.total_bytes, 300);

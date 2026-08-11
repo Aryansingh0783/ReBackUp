@@ -18,7 +18,7 @@ pub mod vault;
 use crate::crypto::{self, SealedBlob, SecretString};
 use crate::error::AppResult;
 use serde::Serialize;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Result of a secret-collection pass. Safe to serialise: counts only.
 #[derive(Serialize, Clone, Debug, Default)]
@@ -115,7 +115,11 @@ pub fn seal_exported_csv(
     shred_source: bool,
 ) -> AppResult<SealedArtifact> {
     let bytes = zeroize::Zeroizing::new(std::fs::read(csv_path)?);
-    let rows = bytes.iter().filter(|b| **b == b'\n').count().saturating_sub(1);
+    let rows = bytes
+        .iter()
+        .filter(|b| **b == b'\n')
+        .count()
+        .saturating_sub(1);
     let artifact = seal_to(
         staging,
         &format!("secrets/{}-passwords.csv.prb", slug(label)),
@@ -179,16 +183,23 @@ pub fn shred(path: &Path) -> AppResult<()> {
 }
 
 fn slug(s: &str) -> String {
-    s.chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_lowercase() } else { '-' })
-        .collect::<String>()
-        .trim_matches('-')
-        .replace("--", "-")
+    // Collapse each run of non-alphanumerics to a single dash as we build the
+    // string. A trailing `.replace("--", "-")` is NOT equivalent: one pass over
+    // `---` leaves `--` behind, and "Opera GX / Default" hits exactly that.
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        if c.is_ascii_alphanumeric() {
+            out.push(c.to_ascii_lowercase());
+        } else if !out.ends_with('-') {
+            out.push('-');
+        }
+    }
+    out.trim_matches('-').to_string()
 }
 
 /// Read back a sealed artifact. Used by the CLI `unseal` subcommand and by the
 /// verify pass.
-pub fn open_sealed(path: &PathBuf, pass: &SecretString) -> AppResult<zeroize::Zeroizing<Vec<u8>>> {
+pub fn open_sealed(path: &Path, pass: &SecretString) -> AppResult<zeroize::Zeroizing<Vec<u8>>> {
     let blob: SealedBlob = crypto::read_sealed(path)?;
     crypto::open(&blob, pass)
 }
@@ -217,7 +228,7 @@ mod tests {
         let ondisk = std::fs::read_to_string(&art.path).unwrap();
         assert!(!ondisk.contains("ghp_TOTALLY_REAL_TOKEN"));
 
-        let back = open_sealed(&PathBuf::from(&art.path), &pass).unwrap();
+        let back = open_sealed(Path::new(&art.path), &pass).unwrap();
         assert_eq!(&back[..], b"ghp_TOTALLY_REAL_TOKEN");
         let _ = std::fs::remove_dir_all(&tmp);
     }

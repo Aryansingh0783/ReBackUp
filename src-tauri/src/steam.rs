@@ -74,10 +74,14 @@ pub fn install_dir() -> Option<PathBuf> {
     }
     // Linux/macOS, for the cross-platform build.
     dirs::home_dir().and_then(|h| {
-        [".steam/steam", ".local/share/Steam", "Library/Application Support/Steam"]
-            .iter()
-            .map(|s| h.join(s))
-            .find(|p| p.is_dir())
+        [
+            ".steam/steam",
+            ".local/share/Steam",
+            "Library/Application Support/Steam",
+        ]
+        .iter()
+        .map(|s| h.join(s))
+        .find(|p| p.is_dir())
     })
 }
 
@@ -139,9 +143,9 @@ pub fn detect() -> AppResult<SteamReport> {
         }
     }
     if report.sentry_files.is_empty() {
-        report
-            .warnings
-            .push("No ssfn* sentry files found — Steam Guard will require a code after restore.".into());
+        report.warnings.push(
+            "No ssfn* sentry files found — Steam Guard will require a code after restore.".into(),
+        );
     } else {
         report.warnings.push(
             "Sentry (ssfn*) files are bound to this machine AND this Windows user SID. After a \
@@ -152,7 +156,11 @@ pub fn detect() -> AppResult<SteamReport> {
     }
 
     // --- other config ----------------------------------------------------
-    for rel in ["config/config.vdf", "config/libraryfolders.vdf", "steamapps/libraryfolders.vdf"] {
+    for rel in [
+        "config/config.vdf",
+        "config/libraryfolders.vdf",
+        "steamapps/libraryfolders.vdf",
+    ] {
         let p = root.join(rel.replace('/', std::path::MAIN_SEPARATOR_STR));
         if p.exists() {
             report.config_files.push(p.display().to_string());
@@ -167,7 +175,10 @@ pub fn detect() -> AppResult<SteamReport> {
 }
 
 fn sget(v: &vdf::Value, k: &str) -> String {
-    v.get(k).and_then(vdf::Value::as_str).unwrap_or("").to_string()
+    v.get(k)
+        .and_then(vdf::Value::as_str)
+        .unwrap_or("")
+        .to_string()
 }
 
 /// `%LOCALAPPDATA%\Steam\local.vdf`
@@ -181,10 +192,14 @@ pub fn library_folders(root: &Path) -> Vec<String> {
     let mut out = vec![root.display().to_string()];
     for rel in ["steamapps/libraryfolders.vdf", "config/libraryfolders.vdf"] {
         let p = root.join(rel.replace('/', std::path::MAIN_SEPARATOR_STR));
-        let Ok(text) = std::fs::read_to_string(&p) else { continue };
+        let Ok(text) = std::fs::read_to_string(&p) else {
+            continue;
+        };
         let Ok(v) = vdf::parse(&text) else { continue };
-        let Some(folders) = v.get("libraryfolders").and_then(vdf::Value::as_obj) else { continue };
-        for (_, entry) in folders {
+        let Some(folders) = v.get("libraryfolders").and_then(vdf::Value::as_obj) else {
+            continue;
+        };
+        for entry in folders.values() {
             // Modern format: { "path" "D:\\SteamLibrary" ... }. Old: "1" "D:\\..."
             let path = entry
                 .get("path")

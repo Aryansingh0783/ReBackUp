@@ -144,7 +144,7 @@ fn scan_summary(state: State<'_, AppState>, scan_id: String) -> AppResult<ScanSu
         .read()
         .get(&scan_id)
         .cloned()
-        .ok_or_else(|| AppError::UnknownScan(scan_id))
+        .ok_or(AppError::UnknownScan(scan_id))
 }
 
 #[tauri::command]
@@ -364,7 +364,10 @@ fn cancel_backup(state: State<'_, AppState>) {
 fn verify_backup(manifest_path: String) -> AppResult<manifest::VerifyResult> {
     let path = std::path::PathBuf::from(&manifest_path);
     let m = manifest::Manifest::read(&path)?;
-    let staging = path.parent().unwrap_or(std::path::Path::new(".")).to_path_buf();
+    let staging = path
+        .parent()
+        .unwrap_or(std::path::Path::new("."))
+        .to_path_buf();
     Ok(manifest::verify(&m, &staging, |_, _| {}))
 }
 
@@ -391,7 +394,7 @@ fn seal_exported_csv(
 #[tauri::command]
 fn unseal_to(sealed_path: String, out_path: String, passphrase: String) -> AppResult<u64> {
     let pass = SecretString::new(passphrase);
-    let plain = secrets::open_sealed(&std::path::PathBuf::from(&sealed_path), &pass)?;
+    let plain = secrets::open_sealed(std::path::Path::new(&sealed_path), &pass)?;
     std::fs::write(&out_path, &plain[..])?;
     Ok(plain.len() as u64)
 }

@@ -232,7 +232,10 @@ pub fn inspect(git_dir: &Path, run_status: bool) -> RepoInfo {
 
     let mut notes = Vec::new();
     if remotes.is_empty() {
-        notes.push("No remote configured — this repo exists nowhere else. Back up the whole folder.".into());
+        notes.push(
+            "No remote configured — this repo exists nowhere else. Back up the whole folder."
+                .into(),
+        );
     }
     if let Some(h) = &credential_helper {
         match h.as_str() {
@@ -330,7 +333,12 @@ fn is_noise(p: &Path) -> bool {
     p.file_name().is_some_and(|n| {
         matches!(
             n.to_string_lossy().as_ref(),
-            "node_modules" | "target" | ".cache" | "Windows" | "$Recycle.Bin" | "System Volume Information"
+            "node_modules"
+                | "target"
+                | ".cache"
+                | "Windows"
+                | "$Recycle.Bin"
+                | "System Volume Information"
         )
     })
 }
@@ -344,7 +352,8 @@ fn base_report() -> GitReport {
         if gc.exists() {
             report.global_config = Some(gc.display().to_string());
             if let Ok(text) = std::fs::read_to_string(&gc) {
-                report.global_credential_helper = parse_config(&text).get("credential.helper").cloned();
+                report.global_credential_helper =
+                    parse_config(&text).get("credential.helper").cloned();
             }
         }
         let creds = h.join(".git-credentials");
@@ -361,7 +370,9 @@ fn base_report() -> GitReport {
             if let Ok(rd) = std::fs::read_dir(&ssh) {
                 for e in rd.flatten() {
                     let name = e.file_name().to_string_lossy().to_string();
-                    if name == "config" || name.starts_with("id_") || name.starts_with("known_hosts")
+                    if name == "config"
+                        || name.starts_with("id_")
+                        || name.starts_with("known_hosts")
                     {
                         report.ssh_keys.push(e.path().display().to_string());
                     }
@@ -402,7 +413,10 @@ mod tests {
             c.get("remote.origin.url").map(String::as_str),
             Some("https://github.com/example/repo.git")
         );
-        assert_eq!(c.get("credential.helper").map(String::as_str), Some("manager-core"));
+        assert_eq!(
+            c.get("credential.helper").map(String::as_str),
+            Some("manager-core")
+        );
     }
 
     #[test]
@@ -417,7 +431,10 @@ mod tests {
     #[test]
     fn last_definition_wins() {
         let c = parse_config("[credential]\nhelper = store\n[credential]\nhelper = wincred\n");
-        assert_eq!(c.get("credential.helper").map(String::as_str), Some("wincred"));
+        assert_eq!(
+            c.get("credential.helper").map(String::as_str),
+            Some("wincred")
+        );
     }
 
     #[test]

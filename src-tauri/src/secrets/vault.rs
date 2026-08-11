@@ -140,8 +140,8 @@ pub fn find_recent_crd(dir: &Path, within_secs: u64) -> Option<PathBuf> {
         })
         .find(|e| {
             e.metadata()
-                .and_then(|m| m.modified())
                 .ok()
+                .and_then(|m| m.modified().ok())
                 .and_then(|t| now.duration_since(t).ok())
                 .is_some_and(|d| d.as_secs() <= within_secs)
         })

@@ -34,12 +34,12 @@ where
     let aborted = Arc::new(AtomicBool::new(false));
 
     let walker = ignore::WalkBuilder::new(root)
-        .hidden(false)          // we WANT dotfiles and hidden files
-        .git_ignore(false)      // .gitignore must not hide backup candidates
+        .hidden(false) // we WANT dotfiles and hidden files
+        .git_ignore(false) // .gitignore must not hide backup candidates
         .git_global(false)
         .git_exclude(false)
         .ignore(false)
-        .follow_links(false)    // never follow symlinks: cycle + escape risk
+        .follow_links(false) // never follow symlinks: cycle + escape risk
         .same_file_system(true) // don't wander into mounted volumes
         .threads(threads.max(1))
         .build_parallel();

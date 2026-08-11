@@ -27,7 +27,8 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use zeroize::{Zeroize, Zeroizing};
 
-const B64: base64::engine::general_purpose::GeneralPurpose = base64::engine::general_purpose::STANDARD;
+const B64: base64::engine::general_purpose::GeneralPurpose =
+    base64::engine::general_purpose::STANDARD;
 
 pub const MAGIC: &str = "PRB1";
 const SALT_LEN: usize = 16;
@@ -116,7 +117,11 @@ pub struct SealedBlob {
     pub label: String,
 }
 
-fn derive_key(pass: &SecretString, salt: &[u8], kdf: &KdfParams) -> AppResult<Zeroizing<[u8; KEY_LEN]>> {
+fn derive_key(
+    pass: &SecretString,
+    salt: &[u8],
+    kdf: &KdfParams,
+) -> AppResult<Zeroizing<[u8; KEY_LEN]>> {
     let params = Params::new(kdf.m_cost_kib, kdf.t_cost, kdf.p_cost, Some(KEY_LEN))
         .map_err(|e| AppError::Crypto(format!("bad Argon2 params: {e}")))?;
     let a2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
@@ -173,7 +178,10 @@ pub fn open(blob: &SealedBlob, pass: &SecretString) -> AppResult<Zeroizing<Vec<u
         )));
     }
     if blob.cipher != "aes-256-gcm" {
-        return Err(AppError::Crypto(format!("unsupported cipher {}", blob.cipher)));
+        return Err(AppError::Crypto(format!(
+            "unsupported cipher {}",
+            blob.cipher
+        )));
     }
     let salt = B64
         .decode(&blob.salt)
@@ -201,7 +209,9 @@ pub fn open(blob: &SealedBlob, pass: &SecretString) -> AppResult<Zeroizing<Vec<u
         // A GCM tag failure is indistinguishable from a wrong passphrase, and
         // that ambiguity is intentional — don't leak which one it was.
         .map_err(|_| {
-            AppError::Crypto("decryption failed: wrong passphrase or the blob was tampered with".into())
+            AppError::Crypto(
+                "decryption failed: wrong passphrase or the blob was tampered with".into(),
+            )
         })?;
     ct.zeroize();
     Ok(Zeroizing::new(pt))
@@ -292,8 +302,10 @@ mod tests {
             .check_strength()
             .is_err());
         assert!(pass().check_strength().is_ok());
-        assert!(SecretString::new("a very long all lowercase passphrase".into())
-            .check_strength()
-            .is_ok());
+        assert!(
+            SecretString::new("a very long all lowercase passphrase".into())
+                .check_strength()
+                .is_ok()
+        );
     }
 }

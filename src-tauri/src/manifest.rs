@@ -117,7 +117,10 @@ impl Manifest {
         let mut problems = Vec::new();
         for s in &self.sealed {
             if !s.encrypted {
-                problems.push(format!("sealed artifact {} is not marked encrypted", s.path));
+                problems.push(format!(
+                    "sealed artifact {} is not marked encrypted",
+                    s.path
+                ));
             }
         }
         // A staged file called *.csv under secrets/ means the shred step failed.
@@ -151,7 +154,11 @@ impl VerifyResult {
 }
 
 /// Re-hash every staged file and compare against the manifest.
-pub fn verify(manifest: &Manifest, staging: &Path, mut on_progress: impl FnMut(usize, usize)) -> VerifyResult {
+pub fn verify(
+    manifest: &Manifest,
+    staging: &Path,
+    mut on_progress: impl FnMut(usize, usize),
+) -> VerifyResult {
     let mut result = VerifyResult {
         checked: 0,
         ok: 0,
@@ -215,7 +222,7 @@ fn os_build() -> Option<String> {
         let product: String = k.get_value("ProductName").ok()?;
         let display: String = k.get_value("DisplayVersion").unwrap_or_default();
         let build: String = k.get_value("CurrentBuild").unwrap_or_default();
-        return Some(format!("{product} {display} (build {build})"));
+        Some(format!("{product} {display} (build {build})"))
     }
     #[cfg(not(windows))]
     {

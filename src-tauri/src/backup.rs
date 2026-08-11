@@ -113,15 +113,25 @@ pub struct BackupPlan {
 fn glob_root(pattern: &str) -> PathBuf {
     let norm = pattern.replace('\\', "/");
     let mut root = PathBuf::new();
+    let mut first = true;
     for seg in norm.split('/') {
         if seg.contains(['*', '?', '[', '{']) {
             break;
         }
-        if root.as_os_str().is_empty() && seg.ends_with(':') {
-            root.push(format!("{seg}\\")); // "C:" alone means CWD-on-C:
-        } else {
-            root.push(seg);
+        if first {
+            first = false;
+            // A leading "/" splits into an empty first segment. Dropping it
+            // would silently turn an absolute path into a relative one.
+            if seg.is_empty() {
+                root.push("/");
+                continue;
+            }
+            if seg.ends_with(':') {
+                root.push(format!("{seg}\\")); // "C:" alone means CWD-on-C:
+                continue;
+            }
         }
+        root.push(seg);
     }
     root
 }
@@ -158,7 +168,12 @@ pub fn plan(selection: &BackupSelection, all_profiles: &[Profile]) -> AppResult<
     let mut secret_actions: BTreeSet<String> = BTreeSet::new();
     let mut seen: BTreeSet<String> = BTreeSet::new();
 
-    let global_excl = build_set(&GLOBAL_EXCLUDES.iter().map(|s| s.to_string()).collect::<Vec<_>>())?;
+    let global_excl = build_set(
+        &GLOBAL_EXCLUDES
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>(),
+    )?;
 
     let chosen: Vec<&Profile> = all_profiles
         .iter()
@@ -173,7 +188,12 @@ pub fn plan(selection: &BackupSelection, all_profiles: &[Profile]) -> AppResult<
 
         let mut includes = profile.expanded_includes();
         if profile.id == "custom" {
-            includes.extend(selection.custom_includes.iter().map(|s| crate::util::expand_env(s)));
+            includes.extend(
+                selection
+                    .custom_includes
+                    .iter()
+                    .map(|s| crate::util::expand_env(s)),
+            );
         }
         let excl = build_set(&profile.expanded_excludes())?;
 
@@ -241,11 +261,13 @@ pub fn plan(selection: &BackupSelection, all_profiles: &[Profile]) -> AppResult<
             .collect();
         items.retain(|i| {
             let s = i.source.replace('\\', "/").to_lowercase();
-            !excl.iter().any(|e| s == *e || s.starts_with(&format!("{e}/")))
+            !excl
+                .iter()
+                .any(|e| s == *e || s.starts_with(&format!("{e}/")))
         });
     }
 
-    let total_bytes = items.iter().map(|i| i.bytes).sum();
+    let total_bytes: u64 = items.iter().map(|i| i.bytes).sum();
     let free_bytes = free_space(&staging);
     if free_bytes > 0 && total_bytes.saturating_mul(2) > free_bytes {
         warnings.push(format!(
@@ -376,7 +398,10 @@ pub fn execute(
     manifest.skipped = plan.skipped.clone();
 
     // --- 1. stage -----------------------------------------------------------
-    log("info", format!("Staging {} files into {}", plan.file_count, plan.staging));
+    log(
+        "info",
+        format!("Staging {} files into {}", plan.file_count, plan.staging),
+    );
     let mut bytes_done = 0u64;
     for (i, item) in plan.items.iter().enumerate() {
         if cancel.load(Ordering::Relaxed) {
@@ -435,7 +460,10 @@ pub fn execute(
     // --- 4. restore assets --------------------------------------------------
     let restore_script = crate::restore::write_script(&staging, &manifest)?;
     crate::restore::write_readme(&staging, &manifest)?;
-    log("info", "Wrote restore.ps1, restore.cmd and READ-ME-FIRST.txt".into());
+    log(
+        "info",
+        "Wrote restore.ps1, restore.cmd and READ-ME-FIRST.txt".into(),
+    );
 
     // --- 5. archive ---------------------------------------------------------
     let archive = match plan.archive {
@@ -451,7 +479,14 @@ pub fn execute(
     // --- 6. verify ----------------------------------------------------------
     log("info", "Verifying hashes…".into());
     let verify = crate::manifest::verify(&manifest, &staging, |d, t| {
-        progress("verify", d as u64, t as u64, bytes_done, plan.total_bytes, "");
+        progress(
+            "verify",
+            d as u64,
+            t as u64,
+            bytes_done,
+            plan.total_bytes,
+            "",
+        );
     });
     if !verify.passed() {
         log(
@@ -555,7 +590,10 @@ fn run_secret_actions(
                 pass,
             ) {
                 Ok((artifact, report)) => {
-                    log("info", format!("Sealed {} logins from {label}", report.decrypted));
+                    log(
+                        "info",
+                        format!("Sealed {} logins from {label}", report.decrypted),
+                    );
                     manifest.sealed.push(artifact);
                 }
                 Err(e) => {
@@ -637,7 +675,10 @@ fn run_secret_actions(
     if actions.contains(&SecretAction::WindowsVault) {
         match crate::secrets::vault::enumerate() {
             Ok(creds) => {
-                log("info", format!("Inventoried {} stored credentials", creds.len()));
+                log(
+                    "info",
+                    format!("Inventoried {} stored credentials", creds.len()),
+                );
                 ctx.insert("credentials".into(), serde_json::to_value(&creds)?);
             }
             Err(e) => manifest.warnings.push(format!("Credential Manager: {e}")),
@@ -718,10 +759,13 @@ fn zip_dir(src: &Path, dst: &Path) -> AppResult<()> {
     use std::io::Write;
     let file = std::fs::File::create(dst)?;
     let mut zip = zip::ZipWriter::new(std::io::BufWriter::new(file));
-    let opts = zip::write::SimpleFileOptions::default()
-        .compression_method(zip::CompressionMethod::Zstd);
+    let opts =
+        zip::write::SimpleFileOptions::default().compression_method(zip::CompressionMethod::Zstd);
 
-    for e in walkdir::WalkDir::new(src).into_iter().filter_map(Result::ok) {
+    for e in walkdir::WalkDir::new(src)
+        .into_iter()
+        .filter_map(Result::ok)
+    {
         let rel = match e.path().strip_prefix(src) {
             Ok(r) if !r.as_os_str().is_empty() => r,
             _ => continue,
@@ -753,7 +797,10 @@ mod tests {
     fn glob_root_stops_at_the_first_wildcard() {
         assert_eq!(
             glob_root(r"C:/Users/a/Desktop/**"),
-            PathBuf::from(r"C:\").join("Users").join("a").join("Desktop")
+            PathBuf::from(r"C:\")
+                .join("Users")
+                .join("a")
+                .join("Desktop")
         );
         assert_eq!(glob_root("/home/a/.ssh"), PathBuf::from("/home/a/.ssh"));
     }

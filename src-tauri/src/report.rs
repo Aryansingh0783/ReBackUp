@@ -82,11 +82,16 @@ pub fn render(manifest: &Manifest, verify: &VerifyResult) -> String {
         esc(&manifest.created),
         esc(&manifest.machine),
         esc(&manifest.user),
-        esc(manifest.windows_build.as_deref().unwrap_or("unknown Windows build"))
+        esc(manifest
+            .windows_build
+            .as_deref()
+            .unwrap_or("unknown Windows build"))
     ));
 
     // --- headline numbers ---------------------------------------------------
-    let card = |k: &str, v: String| format!("<div class=\"card\"><div class=\"k\">{k}</div><div class=\"v\">{v}</div></div>");
+    let card = |k: &str, v: String| {
+        format!("<div class=\"card\"><div class=\"k\">{k}</div><div class=\"v\">{v}</div></div>")
+    };
     h.push_str("<div class=\"grid\">");
     h.push_str(&card("Files", manifest.file_count.to_string()));
     h.push_str(&card("Size", human_bytes(manifest.total_bytes)));
@@ -105,7 +110,12 @@ pub fn render(manifest: &Manifest, verify: &VerifyResult) -> String {
     if !verify.passed() {
         h.push_str("<h2>Verification failures</h2><div class=\"note\">");
         h.push_str("These files did not match their recorded hash. <b>Do not reset until this is resolved.</b><ul>");
-        for p in verify.mismatched.iter().chain(verify.missing.iter()).take(50) {
+        for p in verify
+            .mismatched
+            .iter()
+            .chain(verify.missing.iter())
+            .take(50)
+        {
             h.push_str(&format!("<li class=\"mono\">{}</li>", esc(p)));
         }
         h.push_str("</ul></div>");
@@ -215,7 +225,11 @@ fn render_context(manifest: &Manifest) -> String {
                     esc(a["accountName"].as_str().unwrap_or("")),
                     esc(a["personaName"].as_str().unwrap_or("")),
                     esc(a["steamId64"].as_str().unwrap_or("")),
-                    if a["rememberPassword"].as_bool().unwrap_or(false) { "yes" } else { "no" }
+                    if a["rememberPassword"].as_bool().unwrap_or(false) {
+                        "yes"
+                    } else {
+                        "no"
+                    }
                 ));
             }
             h.push_str("</table>");
@@ -281,7 +295,11 @@ fn render_context(manifest: &Manifest) -> String {
     h
 }
 
-pub fn write_html(staging: &Path, manifest: &Manifest, verify: &VerifyResult) -> AppResult<PathBuf> {
+pub fn write_html(
+    staging: &Path,
+    manifest: &Manifest,
+    verify: &VerifyResult,
+) -> AppResult<PathBuf> {
     let path = staging.join("report.html");
     std::fs::write(&path, render(manifest, verify))?;
     Ok(path)

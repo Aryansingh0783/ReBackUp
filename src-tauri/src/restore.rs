@@ -105,7 +105,13 @@ mod tests {
 
     #[test]
     fn template_documents_every_profile_with_manual_steps() {
-        for id in ["opera-gx", "steam", "git-repos", "windows-credentials", "ai-tools"] {
+        for id in [
+            "opera-gx",
+            "steam",
+            "git-repos",
+            "windows-credentials",
+            "ai-tools",
+        ] {
             assert!(
                 RESTORE_TEMPLATE.contains(id),
                 "restore template has no follow-up section for {id}"

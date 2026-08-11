@@ -18,9 +18,11 @@ pub enum Value {
 impl Value {
     pub fn get(&self, key: &str) -> Option<&Value> {
         match self {
-            Value::Obj(m) => m
-                .get(key)
-                .or_else(|| m.iter().find(|(k, _)| k.eq_ignore_ascii_case(key)).map(|(_, v)| v)),
+            Value::Obj(m) => m.get(key).or_else(|| {
+                m.iter()
+                    .find(|(k, _)| k.eq_ignore_ascii_case(key))
+                    .map(|(_, v)| v)
+            }),
             _ => None,
         }
     }

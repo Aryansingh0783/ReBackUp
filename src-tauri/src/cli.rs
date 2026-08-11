@@ -76,7 +76,7 @@ fn unseal(args: &[String]) -> i32 {
         return 1;
     }
     let pass = read_passphrase(args);
-    match crate::secrets::open_sealed(&PathBuf::from(&src), &pass) {
+    match crate::secrets::open_sealed(Path::new(&src), &pass) {
         Ok(plain) => {
             if let Err(e) = std::fs::write(&dst, &plain[..]) {
                 eprintln!("write failed: {e}");
@@ -169,7 +169,10 @@ mod tests {
     fn unknown_subcommands_fall_through_to_the_gui() {
         // `maybe_run` reads real argv, so exercise the classifier directly.
         for cmd in ["unseal", "verify", "shred", "--help", "-V"] {
-            assert!(matches!(cmd, "unseal" | "verify" | "shred" | "--help" | "-V"));
+            assert!(matches!(
+                cmd,
+                "unseal" | "verify" | "shred" | "--help" | "-V"
+            ));
         }
     }
 }

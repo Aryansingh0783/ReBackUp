@@ -57,14 +57,54 @@ struct Candidate {
 }
 
 const CHROMIUM: &[Candidate] = &[
-    Candidate { browser: "Opera GX",        roaming: true,  rel: r"Opera Software\Opera GX Stable",              chrome_style: false },
-    Candidate { browser: "Opera",           roaming: true,  rel: r"Opera Software\Opera Stable",                 chrome_style: false },
-    Candidate { browser: "Opera Air",       roaming: true,  rel: r"Opera Software\Opera Air Stable",             chrome_style: false },
-    Candidate { browser: "Google Chrome",   roaming: false, rel: r"Google\Chrome\User Data",                     chrome_style: true },
-    Candidate { browser: "Microsoft Edge",  roaming: false, rel: r"Microsoft\Edge\User Data",                    chrome_style: true },
-    Candidate { browser: "Brave",           roaming: false, rel: r"BraveSoftware\Brave-Browser\User Data",       chrome_style: true },
-    Candidate { browser: "Vivaldi",         roaming: false, rel: r"Vivaldi\User Data",                           chrome_style: true },
-    Candidate { browser: "Chromium",        roaming: false, rel: r"Chromium\User Data",                          chrome_style: true },
+    Candidate {
+        browser: "Opera GX",
+        roaming: true,
+        rel: r"Opera Software\Opera GX Stable",
+        chrome_style: false,
+    },
+    Candidate {
+        browser: "Opera",
+        roaming: true,
+        rel: r"Opera Software\Opera Stable",
+        chrome_style: false,
+    },
+    Candidate {
+        browser: "Opera Air",
+        roaming: true,
+        rel: r"Opera Software\Opera Air Stable",
+        chrome_style: false,
+    },
+    Candidate {
+        browser: "Google Chrome",
+        roaming: false,
+        rel: r"Google\Chrome\User Data",
+        chrome_style: true,
+    },
+    Candidate {
+        browser: "Microsoft Edge",
+        roaming: false,
+        rel: r"Microsoft\Edge\User Data",
+        chrome_style: true,
+    },
+    Candidate {
+        browser: "Brave",
+        roaming: false,
+        rel: r"BraveSoftware\Brave-Browser\User Data",
+        chrome_style: true,
+    },
+    Candidate {
+        browser: "Vivaldi",
+        roaming: false,
+        rel: r"Vivaldi\User Data",
+        chrome_style: true,
+    },
+    Candidate {
+        browser: "Chromium",
+        roaming: false,
+        rel: r"Chromium\User Data",
+        chrome_style: true,
+    },
 ];
 
 fn base(roaming: bool) -> Option<PathBuf> {
@@ -109,14 +149,18 @@ pub fn detect_all() -> Vec<BrowserProfile> {
     let mut out = Vec::new();
 
     for c in CHROMIUM {
-        let Some(root) = base(c.roaming).map(|b| b.join(c.rel)) else { continue };
+        let Some(root) = base(c.roaming).map(|b| b.join(c.rel)) else {
+            continue;
+        };
         if !root.is_dir() {
             continue;
         }
 
         // The matching directory under the *other* appdata root, which holds
         // caches, extensions state and (for Opera) the GX-specific data.
-        let sibling = base(!c.roaming).map(|b| b.join(c.rel)).filter(|p| p.is_dir());
+        let sibling = base(!c.roaming)
+            .map(|b| b.join(c.rel))
+            .filter(|p| p.is_dir());
 
         let profile_dirs: Vec<(String, PathBuf)> = if c.chrome_style {
             let mut v = Vec::new();
@@ -158,8 +202,7 @@ pub fn detect_all() -> Vec<BrowserProfile> {
             }
             if c.browser.starts_with("Opera") {
                 notes.push(
-                    "Opera keeps `Local State` inside the profile folder, not its parent."
-                        .into(),
+                    "Opera keeps `Local State` inside the profile folder, not its parent.".into(),
                 );
             }
 
@@ -196,7 +239,9 @@ fn detect_firefox() -> Vec<BrowserProfile> {
     let Some(root) = dirs::config_dir().map(|b| b.join(r"Mozilla\Firefox\Profiles")) else {
         return vec![];
     };
-    let Ok(rd) = std::fs::read_dir(&root) else { return vec![] };
+    let Ok(rd) = std::fs::read_dir(&root) else {
+        return vec![];
+    };
 
     rd.flatten()
         .filter(|e| e.path().is_dir())
@@ -250,7 +295,10 @@ mod tests {
         std::fs::write(tmp.join("Local State"), "{}").unwrap();
         std::fs::write(profile.join("Local State"), "{}").unwrap();
 
-        assert_eq!(find_local_state(&profile).unwrap(), profile.join("Local State"));
+        assert_eq!(
+            find_local_state(&profile).unwrap(),
+            profile.join("Local State")
+        );
         std::fs::remove_file(profile.join("Local State")).unwrap();
         // Falls back to the parent, which is the Chrome layout.
         assert_eq!(find_local_state(&profile).unwrap(), tmp.join("Local State"));
@@ -259,8 +307,14 @@ mod tests {
 
     #[test]
     fn maps_browsers_to_their_settings_urls() {
-        assert_eq!(password_manager_url("Opera GX"), "opera://settings/passwords");
-        assert_eq!(password_manager_url("Google Chrome"), "chrome://password-manager/passwords");
+        assert_eq!(
+            password_manager_url("Opera GX"),
+            "opera://settings/passwords"
+        );
+        assert_eq!(
+            password_manager_url("Google Chrome"),
+            "chrome://password-manager/passwords"
+        );
         assert_eq!(password_manager_url("Firefox"), "about:logins");
     }
 }

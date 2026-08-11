@@ -74,7 +74,11 @@ pub fn ai_and_dev_tools() -> Vec<Detection> {
             "Cursor",
             &[appdata("Cursor/User"), home(".cursor")],
         ),
-        probe("windsurf", "Windsurf", &[appdata("Windsurf/User"), home(".windsurf")]),
+        probe(
+            "windsurf",
+            "Windsurf",
+            &[appdata("Windsurf/User"), home(".windsurf")],
+        ),
         probe("claude-desktop", "Claude Desktop", &[appdata("Claude")]),
         probe("chatgpt-desktop", "ChatGPT Desktop", &[appdata("ChatGPT")]),
         probe("jetbrains", "JetBrains IDEs", &[appdata("JetBrains")]),
@@ -86,7 +90,7 @@ pub fn ai_and_dev_tools() -> Vec<Detection> {
     // excluded by default.
     let ollama_root = home(".ollama");
     let blobs = ollama_root.join("models").join("blobs");
-    let mut ollama = probe("ollama", "Ollama", &[ollama_root.clone()]);
+    let mut ollama = probe("ollama", "Ollama", std::slice::from_ref(&ollama_root));
     if ollama.found {
         let weights = sample_size(&blobs, 2, 512 << 30);
         ollama.detail = Some(format!(
@@ -102,8 +106,9 @@ pub fn ai_and_dev_tools() -> Vec<Detection> {
     let lms_cache = home(".cache/lm-studio");
     let mut lm = probe("lm-studio", "LM Studio", &[lms, lms_cache]);
     if lm.found {
-        lm.detail =
-            Some("Downloaded GGUF models are excluded by default; settings and chats are kept.".into());
+        lm.detail = Some(
+            "Downloaded GGUF models are excluded by default; settings and chats are kept.".into(),
+        );
     }
     out.push(lm);
 
@@ -127,9 +132,21 @@ pub fn all() -> Vec<Detection> {
                 local("Opera Software/Opera GX Stable"),
             ],
         ),
-        probe("chrome", "Google Chrome", &[local("Google/Chrome/User Data")]),
-        probe("edge", "Microsoft Edge", &[local("Microsoft/Edge/User Data")]),
-        probe("brave", "Brave", &[local("BraveSoftware/Brave-Browser/User Data")]),
+        probe(
+            "chrome",
+            "Google Chrome",
+            &[local("Google/Chrome/User Data")],
+        ),
+        probe(
+            "edge",
+            "Microsoft Edge",
+            &[local("Microsoft/Edge/User Data")],
+        ),
+        probe(
+            "brave",
+            "Brave",
+            &[local("BraveSoftware/Brave-Browser/User Data")],
+        ),
         probe("firefox", "Firefox", &[appdata("Mozilla/Firefox")]),
         probe("wsl", "WSL config", &[home(".wslconfig")]),
         probe(

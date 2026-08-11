@@ -219,10 +219,7 @@ pub fn builtin() -> Vec<Profile> {
             "Git repositories",
             "Repos with unpushed or uncommitted work, plus remotes, config and SSH keys.",
             Category::Development,
-            &[
-                "%USERPROFILE%/.gitconfig",
-                "%USERPROFILE%/.ssh/**",
-            ],
+            &["%USERPROFILE%/.gitconfig", "%USERPROFILE%/.ssh/**"],
             &[],
             vec![SecretAction::GitCredentials],
             true,
@@ -346,7 +343,10 @@ pub fn load() -> Vec<Profile> {
                     m.secrets = s.secrets;
                 }
             }
-            None => merged.push(Profile { builtin: false, ..s }),
+            None => merged.push(Profile {
+                builtin: false,
+                ..s
+            }),
         }
     }
     merged
