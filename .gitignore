@@ -1,0 +1,34 @@
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+.pnpm-store/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+**/*.rs.bk
+
+# Docs
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+
+# NEVER commit these — they may contain real secrets from local testing
+*.crd
+*.prb
+*.prbmanifest
+Login Data
+"Local State"
+*.vdf
+ssfn*
+passwords*.csv
+staging/
+PreResetBackup_*/

@@ -1,0 +1,31 @@
+name: Bug report
+description: Something didn't work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste a manifest, a `.prb` file, a `Local State`, or anything from
+        `secrets/` into an issue.** Manifests contain full file paths, and paths
+        leak more than people expect.
+  - type: input
+    id: version
+    attributes: { label: App version, placeholder: "0.1.0" }
+    validations: { required: true }
+  - type: input
+    id: windows
+    attributes: { label: Windows build, placeholder: "11 24H2 (26100)" }
+  - type: dropdown
+    id: elevated
+    attributes:
+      label: Was the app elevated?
+      options: ["Yes", "No", "Not sure"]
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the exact error text if there was one.
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes: { label: Steps to reproduce }

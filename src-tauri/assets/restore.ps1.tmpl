@@ -1,0 +1,240 @@
+<#
+.SYNOPSIS
+    Restores a Pre-Reset Backup onto a fresh Windows install.
+
+.DESCRIPTION
+    Reads manifest.json (written by pre-reset-backup) and puts every staged file
+    back at its original path. The script is IDEMPOTENT: a file already present
+    with the correct SHA-256 is left alone, so re-running after a partial
+    restore is safe and cheap.
+
+    Nothing is decrypted by this script. Sealed artifacts (*.prb) are Argon2id +
+    AES-256-GCM and are opened by the app itself:
+        pre-reset-backup.exe unseal --in <file>.prb --out <file>
+
+.PARAMETER Staging
+    Folder containing manifest.json. Defaults to the script's own directory.
+
+.PARAMETER DryRun
+    Print what would happen and change nothing.
+
+.PARAMETER Force
+    Overwrite existing files even when their hash already matches.
+
+.PARAMETER Only
+    Restore just these profiles, e.g. -Only desktop,opera-gx
+
+.PARAMETER SkipVerify
+    Skip SHA-256 verification. Faster, and a bad idea.
+
+.EXAMPLE
+    .\restore.ps1 -DryRun
+    .\restore.ps1 -Only desktop,ai-tools
+    .\restore.ps1 -Force
+#>
+[CmdletBinding()]
+param(
+    [string]   $Staging = $PSScriptRoot,
+    [switch]   $DryRun,
+    [switch]   $Force,
+    [string[]] $Only,
+    [switch]   $SkipVerify
+)
+
+$ErrorActionPreference = 'Stop'
+$script:Restored = 0; $script:Skipped = 0; $script:Failed = 0; $script:Bytes = 0
+
+function Write-Step { param($m) Write-Host "`n=== $m ===" -ForegroundColor Cyan }
+function Write-Ok   { param($m) Write-Host "  [ok]   $m" -ForegroundColor Green }
+function Write-Warn { param($m) Write-Host "  [warn] $m" -ForegroundColor Yellow }
+function Write-Err  { param($m) Write-Host "  [FAIL] $m" -ForegroundColor Red }
+
+# --- load manifest ----------------------------------------------------------
+$manifestPath = Join-Path $Staging 'manifest.json'
+if (-not (Test-Path $manifestPath)) {
+    throw "manifest.json not found in '$Staging'. Point -Staging at the backup folder."
+}
+$m = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+
+Write-Step "Pre-Reset Backup restore"
+Write-Host "  Source machine : $($m.machine) / $($m.user)"
+Write-Host "  Created        : $($m.created)"
+Write-Host "  Files          : $($m.fileCount)  ($([math]::Round($m.totalBytes/1GB,2)) GB)"
+Write-Host "  Sealed items   : $($m.sealed.Count)"
+Write-Host "  Profiles       : $($m.profiles -join ', ')"
+if ($DryRun) { Write-Warn 'DRY RUN — nothing will be written.' }
+
+# --- helpers ----------------------------------------------------------------
+function Get-Sha256 {
+    param([string]$Path)
+    (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+# Rewrite a source path recorded on the old machine onto this one. The user
+# profile name is the only piece that reliably changes.
+function Resolve-Target {
+    param([string]$Source, [string]$OldUser)
+    $newUser = $env:USERNAME
+    if ($OldUser -and $newUser -and ($OldUser -ne $newUser)) {
+        $needle = "\Users\$OldUser\"
+        # .Contains, not -like: a folder called "[2024] Photos" would otherwise
+        # be treated as a wildcard character class and silently not match.
+        if ($Source.Contains($needle)) {
+            return $Source.Replace($needle, "\Users\$newUser\")
+        }
+    }
+    return $Source
+}
+
+# --- 1. files ---------------------------------------------------------------
+Write-Step 'Restoring files'
+$entries = $m.entries
+if ($Only) { $entries = $entries | Where-Object { $Only -contains $_.profile } }
+
+$i = 0
+foreach ($e in $entries) {
+    $i++
+    if ($i % 200 -eq 0) {
+        Write-Progress -Activity 'Restoring files' -Status "$i / $($entries.Count)" `
+                       -PercentComplete ([math]::Min(100, 100 * $i / [math]::Max(1,$entries.Count)))
+    }
+
+    $staged = Join-Path $Staging $e.staged
+    $target = Resolve-Target -Source $e.source -OldUser $m.user
+
+    if (-not (Test-Path -LiteralPath $staged)) {
+        Write-Err "missing from backup: $($e.staged)"; $script:Failed++; continue
+    }
+
+    if (-not $SkipVerify) {
+        $actual = Get-Sha256 $staged
+        if ($actual -ne $e.sha256) {
+            Write-Err "hash mismatch, refusing to restore: $($e.staged)"
+            $script:Failed++; continue
+        }
+    }
+
+    if ((Test-Path -LiteralPath $target) -and -not $Force) {
+        if (-not $SkipVerify -and (Get-Sha256 $target) -eq $e.sha256) {
+            $script:Skipped++; continue        # already correct
+        }
+        Write-Warn "exists and differs, skipping (use -Force): $target"
+        $script:Skipped++; continue
+    }
+
+    if ($DryRun) { Write-Host "  would restore -> $target"; $script:Restored++; continue }
+
+    try {
+        $dir = Split-Path -Parent $target
+        if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $staged -Destination $target -Force
+        $script:Restored++; $script:Bytes += $e.bytes
+    } catch {
+        Write-Err "$target : $($_.Exception.Message)"; $script:Failed++
+    }
+}
+Write-Progress -Activity 'Restoring files' -Completed
+Write-Ok "restored $script:Restored, skipped $script:Skipped, failed $script:Failed"
+
+# --- 2. sealed artifacts ----------------------------------------------------
+if ($m.sealed.Count -gt 0) {
+    Write-Step 'Encrypted artifacts'
+    $exe = Get-Command 'pre-reset-backup.exe' -ErrorAction SilentlyContinue
+    if (-not $exe) {
+        $local = Join-Path $Staging 'pre-reset-backup.exe'
+        if (Test-Path $local) { $exe = $local }
+    }
+    foreach ($s in $m.sealed) {
+        $name = Split-Path -Leaf $s.path
+        Write-Host "  $name  <- $($s.label)  [$($s.algorithm) / $($s.kdf), $($s.items) item(s)]"
+    }
+    if ($exe) {
+        Write-Host ''
+        Write-Host '  Unseal with:' -ForegroundColor Cyan
+        Write-Host "    pre-reset-backup.exe unseal --in `"<file>.prb`" --out `"<file>`""
+    } else {
+        Write-Warn 'pre-reset-backup.exe not found. Install the app, then run the unseal command above.'
+    }
+}
+
+# --- 3. per-profile follow-ups ---------------------------------------------
+Write-Step 'Manual steps'
+
+if ($m.profiles -contains 'opera-gx' -or $m.profiles -contains 'chromium-browsers') {
+    Write-Host @'
+  Browser passwords
+    1. Unseal the *-passwords.csv.prb artifact to a CSV.
+    2. Open the browser's password manager settings
+       (Opera GX: opera://settings/passwords, Chrome: chrome://password-manager/settings).
+    3. Choose Import and pick the CSV.
+    4. SHRED THE CSV afterwards:
+         pre-reset-backup.exe shred --path "<file>.csv"
+    Restoring the profile folder brings tabs, bookmarks, extensions and sessions
+    back; only the passwords need the CSV round-trip (the profile's own copies
+    are encrypted to the OLD Windows account and cannot be recovered).
+'@
+}
+
+if ($m.profiles -contains 'steam') {
+    Write-Host @'
+  Steam
+    1. Install Steam, then CLOSE it completely (check the tray).
+    2. Restore config\loginusers.vdf, config\config.vdf and the ssfn* files.
+    3. Start Steam. Expect a Steam Guard code: sentry files are bound to the old
+       machine AND the old Windows SID, which no longer exists.
+    4. Point Steam at your old library folders (Settings > Storage) instead of
+       re-downloading everything.
+'@
+}
+
+if ($m.profiles -contains 'git-repos') {
+    Write-Host @'
+  Git
+    1. Restore ~/.gitconfig and ~/.ssh (unseal the private keys first).
+    2. Fix key permissions so OpenSSH will use them:
+         icacls "$env:USERPROFILE\.ssh\id_ed25519" /inheritance:r /grant:r "$env:USERNAME:R"
+    3. Reconfigure the credential helper:
+         git config --global credential.helper manager
+    4. Re-authenticate on first push. If you restored ~/.git-credentials,
+       ROTATE those tokens — they were stored in plaintext.
+'@
+}
+
+if ($m.profiles -contains 'windows-credentials') {
+    Write-Host @'
+  Windows Credentials
+    1. Run:  rundll32.exe keymgr.dll,KRShowKeyMgr
+    2. Choose "Restore Credentials" and select your .crd file.
+    3. Press Ctrl+Alt+Delete when prompted and enter the protection password
+       you set during backup. This runs on the secure desktop by design.
+'@
+}
+
+if ($m.profiles -contains 'ai-tools') {
+    Write-Host @'
+  AI / editor tools
+    1. Install the apps first, then restore their config (settings.json etc.).
+    2. Re-pull local models:  ollama pull <model>   (the manifest lists them)
+    3. MCP server configs may reference API keys that were sealed separately —
+       unseal and re-add them.
+'@
+}
+
+# --- 4. warnings ------------------------------------------------------------
+if ($m.warnings.Count -gt 0) {
+    Write-Step 'Warnings recorded at backup time'
+    foreach ($w in $m.warnings) { Write-Warn $w }
+}
+
+Write-Step 'Summary'
+Write-Host "  Restored : $script:Restored file(s), $([math]::Round($script:Bytes/1MB,1)) MB"
+Write-Host "  Skipped  : $script:Skipped"
+Write-Host "  Failed   : $script:Failed"
+if ($script:Failed -gt 0) {
+    Write-Err 'Some files failed. Re-run this script — it is idempotent.'
+    exit 1
+}
+Write-Ok 'Restore complete.'
+exit 0

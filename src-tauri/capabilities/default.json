@@ -1,0 +1,20 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Least-privilege surface for the main window. The webview gets NO filesystem and NO shell access: every file operation runs inside a Rust command with a specific, auditable purpose. All the webview can do is open a native picker, show a dialog, and ask the OS to open a path the backend just produced.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:allow-start-dragging",
+    "core:webview:allow-internal-toggle-devtools",
+
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    "dialog:allow-ask",
+
+    "opener:allow-open-path",
+    "opener:allow-open-url"
+  ]
+}
