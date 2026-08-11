@@ -1,0 +1,9 @@
+# Optional developer tweaks. Copy to config.toml (gitignored) to use.
+#
+# Faster incremental linking on Windows:
+# [target.x86_64-pc-windows-msvc]
+# linker = "rust-lld.exe"
+#
+# Keep debug builds honest about the MFT parser's bounds checks:
+# [profile.dev]
+# debug-assertions = true

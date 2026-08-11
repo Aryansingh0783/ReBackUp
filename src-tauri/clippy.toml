@@ -1,0 +1,4 @@
+# The MFT parser legitimately juggles raw offsets and the scan index carries a
+# lot of parallel arrays; these thresholds keep clippy useful instead of noisy.
+too-many-arguments-threshold = 8
+type-complexity-threshold = 350

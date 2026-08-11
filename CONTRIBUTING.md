@@ -10,6 +10,13 @@ pnpm tauri dev
 cd src-tauri && cargo test --all-features
 ```
 
+CI gates on `cargo fmt --all -- --check`, so run the formatter once before your
+first commit — it's the cheapest red build to avoid:
+
+```bash
+cd src-tauri && cargo fmt --all
+```
+
 Run everything CI runs before you push:
 
 ```bash
