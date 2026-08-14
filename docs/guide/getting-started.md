@@ -2,7 +2,7 @@
 
 ## Install
 
-Grab the `.msi` or the NSIS `.exe` from [Releases](https://github.com/Aryansingh0783/pre-reset-backup/releases), or build it yourself:
+Grab the `.msi` or the NSIS `.exe` from [Releases](https://github.com/Aryansingh0783/rebackup/releases), or build it yourself:
 
 ```bash
 pnpm install
@@ -28,7 +28,7 @@ Without elevation everything still works — the scanner falls back to a directo
 Three things, in this order:
 
 1. The backup folder is on an external drive, not on `C:`.
-2. `pre-reset-backup.exe verify --manifest <path>` passes **from that external copy**.
+2. `rebackup.exe verify --manifest <path>` passes **from that external copy**.
 3. Your passphrase is written down somewhere that isn't this computer.
 
 Then, and only then, reset Windows.

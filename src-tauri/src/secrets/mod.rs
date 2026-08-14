@@ -93,7 +93,7 @@ pub fn seal_browser_logins(
     let csv = chromium::to_csv(&records);
     let artifact = seal_to(
         staging,
-        &format!("secrets/{}-passwords.csv.prb", slug(label)),
+        &format!("secrets/{}-passwords.csv.rbu", slug(label)),
         csv.as_bytes(),
         pass,
         &format!("{label} passwords (Chromium CSV)"),
@@ -122,7 +122,7 @@ pub fn seal_exported_csv(
         .saturating_sub(1);
     let artifact = seal_to(
         staging,
-        &format!("secrets/{}-passwords.csv.prb", slug(label)),
+        &format!("secrets/{}-passwords.csv.rbu", slug(label)),
         &bytes,
         pass,
         &format!("{label} passwords (manual export)"),
@@ -216,13 +216,13 @@ mod tests {
 
     #[test]
     fn seals_a_file_and_leaves_no_plaintext_behind() {
-        let tmp = std::env::temp_dir().join(format!("prb-seal-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("rbu-seal-{}", std::process::id()));
         std::fs::create_dir_all(&tmp).unwrap();
         let src = tmp.join("token.txt");
         std::fs::write(&src, b"ghp_TOTALLY_REAL_TOKEN").unwrap();
 
         let pass = SecretString::new("a very long all lowercase passphrase".into());
-        let art = seal_file(&tmp, &src, "secrets/token.prb", "token", &pass).unwrap();
+        let art = seal_file(&tmp, &src, "secrets/token.rbu", "token", &pass).unwrap();
         assert!(art.encrypted);
 
         let ondisk = std::fs::read_to_string(&art.path).unwrap();
@@ -235,7 +235,7 @@ mod tests {
 
     #[test]
     fn shred_removes_the_file() {
-        let p = std::env::temp_dir().join(format!("prb-shred-{}.txt", std::process::id()));
+        let p = std::env::temp_dir().join(format!("rbu-shred-{}.txt", std::process::id()));
         std::fs::write(&p, b"secret").unwrap();
         shred(&p).unwrap();
         assert!(!p.exists());

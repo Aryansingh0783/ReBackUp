@@ -72,12 +72,12 @@ pub fn render(manifest: &Manifest, verify: &VerifyResult) -> String {
     h.push_str(&format!(
         "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">\
          <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\
-         <title>Pre-Reset Backup — {}</title><style>{CSS}</style></head><body>",
+         <title>ReBackUp — {}</title><style>{CSS}</style></head><body>",
         esc(&manifest.machine)
     ));
 
     h.push_str(&format!(
-        "<h1>Pre-Reset Backup {status}</h1>\
+        "<h1>ReBackUp {status}</h1>\
          <div class=\"sub\">{} &middot; {}\\{} &middot; {}</div>",
         esc(&manifest.created),
         esc(&manifest.machine),
@@ -137,7 +137,7 @@ pub fn render(manifest: &Manifest, verify: &VerifyResult) -> String {
         h.push_str(
             "<h2>Encrypted artifacts</h2>\
              <p class=\"sub\">Argon2id-derived key, AES-256-GCM. Plaintext never touched the disk. \
-             Open with <code>pre-reset-backup.exe unseal</code>.</p>\
+             Open with <code>rebackup.exe unseal</code>.</p>\
              <table><tr><th>File</th><th>Contents</th><th class=\"n\">Items</th><th class=\"n\">Size</th></tr>",
         );
         for s in &manifest.sealed {
@@ -202,7 +202,7 @@ pub fn render(manifest: &Manifest, verify: &VerifyResult) -> String {
     );
 
     h.push_str(&format!(
-        "<div class=\"foot\">pre-reset-backup {} &middot; manifest v{} &middot; staging <span class=\"mono\">{}</span></div>",
+        "<div class=\"foot\">rebackup {} &middot; manifest v{} &middot; staging <span class=\"mono\">{}</span></div>",
         esc(&manifest.tool_version),
         manifest.version,
         esc(&manifest.staging_root)

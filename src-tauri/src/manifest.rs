@@ -75,7 +75,7 @@ impl Manifest {
     pub fn new(staging_root: &Path, profiles: Vec<String>) -> Self {
         Self {
             version: MANIFEST_VERSION,
-            tool: "pre-reset-backup".into(),
+            tool: "rebackup".into(),
             tool_version: env!("CARGO_PKG_VERSION").into(),
             created: crate::util::rfc3339_now(),
             machine: hostname(),
@@ -126,7 +126,7 @@ impl Manifest {
         // A staged file called *.csv under secrets/ means the shred step failed.
         for e in &self.entries {
             let staged = e.staged.to_lowercase();
-            if staged.contains("secrets/") && !staged.ends_with(".prb") {
+            if staged.contains("secrets/") && !staged.ends_with(".rbu") {
                 problems.push(format!(
                     "unsealed file inside secrets/: {} — refusing to publish",
                     e.staged
@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn verify_detects_tampering_and_deletion() {
-        let dir = std::env::temp_dir().join(format!("prb-man-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-man-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("files")).unwrap();
         std::fs::write(dir.join("files/good.txt"), b"abc").unwrap();
         std::fs::write(dir.join("files/bad.txt"), b"xyz").unwrap();
@@ -272,13 +272,13 @@ mod tests {
         assert!(!m.audit_for_plaintext_secrets().is_empty());
 
         let mut ok = Manifest::new(Path::new("/tmp"), vec![]);
-        ok.push(entry("secrets/passwords.csv.prb"));
+        ok.push(entry("secrets/passwords.csv.rbu"));
         assert!(ok.audit_for_plaintext_secrets().is_empty());
     }
 
     #[test]
     fn manifest_round_trips_through_json() {
-        let dir = std::env::temp_dir().join(format!("prb-man2-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-man2-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let mut m = Manifest::new(&dir, vec!["desktop".into()]);
         m.push(entry("files/a.txt"));

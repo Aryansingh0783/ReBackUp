@@ -16,13 +16,13 @@ It also rewrites `\Users\<oldname>\` to your new username automatically, which i
 ## Browser passwords
 
 ```powershell
-pre-reset-backup.exe unseal --in secrets\opera-gx-default-passwords.csv.prb --out passwords.csv
+rebackup.exe unseal --in secrets\opera-gx-default-passwords.csv.rbu --out passwords.csv
 ```
 
 Then in the browser: password manager settings → **Import** → pick the CSV. Finally:
 
 ```powershell
-pre-reset-backup.exe shred --path passwords.csv
+rebackup.exe shred --path passwords.csv
 ```
 
 Restoring the profile folder brings back tabs, bookmarks, extensions and sessions. Only passwords need the CSV round-trip — the profile's own copies are encrypted to the *old* Windows account and are unrecoverable.

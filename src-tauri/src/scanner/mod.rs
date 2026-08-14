@@ -122,7 +122,7 @@ pub fn start(app: AppHandle, store: Arc<ScanStore>, opts: ScanOptions) -> String
 
     let id2 = scan_id.clone();
     std::thread::Builder::new()
-        .name("prb-scan".into())
+        .name("rbu-scan".into())
         .spawn(move || {
             let started = std::time::Instant::now();
             let (index, completed, backend, fallback) = run(&app, &id2, &ctl, &opts);

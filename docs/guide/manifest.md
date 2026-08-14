@@ -5,13 +5,13 @@
 ```jsonc
 {
   "version": 1,
-  "tool": "pre-reset-backup",
+  "tool": "rebackup",
   "toolVersion": "0.1.0",
   "created": "2026-08-11T17:42:33Z",
   "machine": "DESKTOP-ABC",
   "user": "you",
   "windowsBuild": "Windows 11 Pro 24H2 (build 26100)",
-  "stagingRoot": "E:\\PreResetBackup_20260811-174233",
+  "stagingRoot": "E:\\ReBackUp_20260811-174233",
   "profiles": ["desktop", "opera-gx", "steam"],
 
   "entries": [
@@ -27,7 +27,7 @@
 
   "sealed": [
     {
-      "path": "E:\\…\\secrets\\opera-gx-default-passwords.csv.prb",
+      "path": "E:\\…\\secrets\\opera-gx-default-passwords.csv.rbu",
       "label": "Opera GX Default passwords (Chromium CSV)",
       "items": 142,
       "sha256": "3b1f…",
@@ -55,7 +55,7 @@
 
 ```jsonc
 {
-  "magic": "PRB1",
+  "magic": "RBU1",
   "cipher": "aes-256-gcm",
   "kdf": { "algorithm": "argon2id", "mCostKib": 65536, "tCost": 3, "pCost": 1 },
   "salt": "<base64, 16 bytes>",

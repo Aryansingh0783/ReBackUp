@@ -104,7 +104,7 @@ export default function ReportView() {
             </li>
             <li>
               Verify from the copy, not the original:{' '}
-              <code className="text-slate-300">pre-reset-backup.exe verify --manifest manifest.json</code>
+              <code className="text-slate-300">rebackup.exe verify --manifest manifest.json</code>
             </li>
             <li>Write your passphrase down somewhere that isn't this computer.</li>
             <li>Only then, reset Windows.</li>
@@ -120,10 +120,10 @@ export default function ReportView() {
 .\\restore.cmd            # or: powershell -File restore.ps1 -DryRun
 
 # 2. Unseal the password CSV
-pre-reset-backup.exe unseal --in secrets\\opera-gx-default-passwords.csv.prb --out passwords.csv
+rebackup.exe unseal --in secrets\\opera-gx-default-passwords.csv.rbu --out passwords.csv
 
 # 3. Import it in the browser's password manager, then:
-pre-reset-backup.exe shred --path passwords.csv`}
+rebackup.exe shred --path passwords.csv`}
           </pre>
         </section>
 

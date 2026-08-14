@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: Pre-Reset Backup
+  name: ReBackUp
   text: Know what you're about to lose
   tagline: A WizTree-style scanner and a profile-driven, verified, encrypted backup — for the hour before you wipe Windows.
   actions:

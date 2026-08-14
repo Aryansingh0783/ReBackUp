@@ -54,7 +54,7 @@ jobs:
       - uses: pnpm/action-setup@v4   # version comes from package.json packageManager
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -76,7 +76,7 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         with:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
-          releaseName: 'Pre-Reset Backup __VERSION__'
+          releaseName: 'ReBackUp __VERSION__'
           releaseBody: |
             See CHANGELOG.md.
 

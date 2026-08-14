@@ -30,7 +30,7 @@ use zeroize::{Zeroize, Zeroizing};
 const B64: base64::engine::general_purpose::GeneralPurpose =
     base64::engine::general_purpose::STANDARD;
 
-pub const MAGIC: &str = "PRB1";
+pub const MAGIC: &str = "RBU1";
 const SALT_LEN: usize = 16;
 const NONCE_LEN: usize = 12;
 const KEY_LEN: usize = 32;

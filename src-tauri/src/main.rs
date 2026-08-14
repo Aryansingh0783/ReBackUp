@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    pre_reset_backup_lib::run();
+    rebackup_lib::run();
 }

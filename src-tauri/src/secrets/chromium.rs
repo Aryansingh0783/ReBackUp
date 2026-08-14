@@ -76,7 +76,7 @@ struct ScratchDb(PathBuf);
 impl ScratchDb {
     fn clone_from(src: &Path) -> AppResult<Self> {
         let dst = std::env::temp_dir().join(format!(
-            "prb-{}-{}.db",
+            "rbu-{}-{}.db",
             std::process::id(),
             uuid::Uuid::new_v4().simple()
         ));
@@ -288,7 +288,7 @@ pub fn extract_logins(
             "This profile uses app-bound encryption (Chrome 127+/Opera equivalent). Those \
              passwords are sealed to a SYSTEM-level service and cannot be read from a normal \
              user process by design. Use the browser's own export: open the password manager \
-             settings, choose Export, and point Pre-Reset Backup at the resulting CSV — it will \
+             settings, choose Export, and point ReBackUp at the resulting CSV — it will \
              be sealed with your passphrase and the plaintext file shredded."
                 .into(),
         )

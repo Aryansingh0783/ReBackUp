@@ -1,16 +1,16 @@
 <#
 .SYNOPSIS
-    Restores a Pre-Reset Backup onto a fresh Windows install.
+    Restores a ReBackUp onto a fresh Windows install.
 
 .DESCRIPTION
-    Reads manifest.json (written by pre-reset-backup) and puts every staged file
+    Reads manifest.json (written by rebackup) and puts every staged file
     back at its original path. The script is IDEMPOTENT: a file already present
     with the correct SHA-256 is left alone, so re-running after a partial
     restore is safe and cheap.
 
-    Nothing is decrypted by this script. Sealed artifacts (*.prb) are Argon2id +
+    Nothing is decrypted by this script. Sealed artifacts (*.rbu) are Argon2id +
     AES-256-GCM and are opened by the app itself:
-        pre-reset-backup.exe unseal --in <file>.prb --out <file>
+        rebackup.exe unseal --in <file>.rbu --out <file>
 
 .PARAMETER Staging
     Folder containing manifest.json. Defaults to the script's own directory.
@@ -56,7 +56,7 @@ if (-not (Test-Path $manifestPath)) {
 }
 $m = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
-Write-Step "Pre-Reset Backup restore"
+Write-Step "ReBackUp restore"
 Write-Host "  Source machine : $($m.machine) / $($m.user)"
 Write-Host "  Created        : $($m.created)"
 Write-Host "  Files          : $($m.fileCount)  ($([math]::Round($m.totalBytes/1GB,2)) GB)"
@@ -141,9 +141,9 @@ Write-Ok "restored $script:Restored, skipped $script:Skipped, failed $script:Fai
 # --- 2. sealed artifacts ----------------------------------------------------
 if ($m.sealed.Count -gt 0) {
     Write-Step 'Encrypted artifacts'
-    $exe = Get-Command 'pre-reset-backup.exe' -ErrorAction SilentlyContinue
+    $exe = Get-Command 'rebackup.exe' -ErrorAction SilentlyContinue
     if (-not $exe) {
-        $local = Join-Path $Staging 'pre-reset-backup.exe'
+        $local = Join-Path $Staging 'rebackup.exe'
         if (Test-Path $local) { $exe = $local }
     }
     foreach ($s in $m.sealed) {
@@ -153,9 +153,9 @@ if ($m.sealed.Count -gt 0) {
     if ($exe) {
         Write-Host ''
         Write-Host '  Unseal with:' -ForegroundColor Cyan
-        Write-Host "    pre-reset-backup.exe unseal --in `"<file>.prb`" --out `"<file>`""
+        Write-Host "    rebackup.exe unseal --in `"<file>.prb`" --out `"<file>`""
     } else {
-        Write-Warn 'pre-reset-backup.exe not found. Install the app, then run the unseal command above.'
+        Write-Warn 'rebackup.exe not found. Install the app, then run the unseal command above.'
     }
 }
 
@@ -165,12 +165,12 @@ Write-Step 'Manual steps'
 if ($m.profiles -contains 'opera-gx' -or $m.profiles -contains 'chromium-browsers') {
     Write-Host @'
   Browser passwords
-    1. Unseal the *-passwords.csv.prb artifact to a CSV.
+    1. Unseal the *-passwords.csv.rbu artifact to a CSV.
     2. Open the browser's password manager settings
        (Opera GX: opera://settings/passwords, Chrome: chrome://password-manager/settings).
     3. Choose Import and pick the CSV.
     4. SHRED THE CSV afterwards:
-         pre-reset-backup.exe shred --path "<file>.csv"
+         rebackup.exe shred --path "<file>.csv"
     Restoring the profile folder brings tabs, bookmarks, extensions and sessions
     back; only the passwords need the CSV round-trip (the profile's own copies
     are encrypted to the OLD Windows account and cannot be recovered).

@@ -22,7 +22,7 @@ Minimum 12 characters and three character classes, or 20+ characters of anything
 
 ## What happens, in order
 
-1. **Stage** — files are copied into `PreResetBackup_<timestamp>/files/`, hashed during the copy so large data is read once, not twice.
+1. **Stage** — files are copied into `ReBackUp_<timestamp>/files/`, hashed during the copy so large data is read once, not twice.
 2. **Seal** — secret actions run *after* staging, so a browser-profile failure can't strand half-copied files.
 3. **Audit** — the run aborts if any unsealed file ended up under `secrets/`.
 4. **Archive** — optional.
@@ -34,9 +34,9 @@ If verification fails, the report says *do not reset yet* in red. Believe it.
 ## Output
 
 ```
-PreResetBackup_20260811-174233/
+ReBackUp_20260811-174233/
 ├── files/C/Users/you/Desktop/...     mirrored source tree
-├── secrets/*.prb                     Argon2id + AES-256-GCM
+├── secrets/*.rbu                     Argon2id + AES-256-GCM
 ├── manifest.json                     every path, size, SHA-256
 ├── report.html                       self-contained, opens offline
 ├── restore.ps1 / restore.cmd         idempotent restore driver

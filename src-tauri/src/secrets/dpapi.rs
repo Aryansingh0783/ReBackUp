@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn round_trips_through_the_current_logon_session() {
-        let secret = b"pre-reset-backup dpapi self-test";
+        let secret = b"rebackup dpapi self-test";
         let blob = protect(secret).expect("CryptProtectData");
         assert_ne!(&blob[..], &secret[..], "blob must not be plaintext");
         let back = unprotect(&blob).expect("CryptUnprotectData");

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Pre-Reset Backup
+# ReBackUp
 
 **Scan your drives like WizTree, pick what actually matters, and walk away with a verified, encrypted backup — before you wipe Windows.**
 
@@ -23,7 +23,7 @@ You back up your Documents folder, wipe the disk, and three days later you disco
 
 None of that lives in Documents. It's scattered across `%APPDATA%`, `%LOCALAPPDATA%`, Program Files and the Windows Credential vault — and most of it is encrypted to a Windows account that is about to stop existing.
 
-**Pre-Reset Backup finds those things, copies them, verifies them, encrypts the sensitive parts, and gives you a script that puts it all back.**
+**ReBackUp finds those things, copies them, verifies them, encrypts the sensitive parts, and gives you a script that puts it all back.**
 
 Everything is local. Nothing is uploaded anywhere, ever. There is no account, no telemetry, and no network code in the app at all.
 
@@ -114,7 +114,7 @@ A **profile** is a named bundle of glob patterns plus zero or more *secret actio
 }
 ```
 
-`%ENV%` is expanded at plan time, not definition time, so a profile file is portable between machines. Built-ins are compiled in; your edits persist to `%APPDATA%\pre-reset-backup\profiles.json` and are merged over the built-ins by `id`, so upgrading keeps your changes.
+`%ENV%` is expanded at plan time, not definition time, so a profile file is portable between machines. Built-ins are compiled in; your edits persist to `%APPDATA%\rebackup\profiles.json` and are merged over the built-ins by `id`, so upgrading keeps your changes.
 
 ### 3. Sealing — how the crypto works
 
@@ -130,7 +130,7 @@ A **profile** is a named bundle of glob patterns plus zero or more *secret actio
    password_value = "v10" ‖ nonce ‖ GCM       ▼
       │                              ┌──────────────────┐
       ▼   AES-256-GCM decrypt        │   AES-256-GCM    │
-  plaintext ──── in memory only ────▶│  KDF params      │──▶  *.prb on disk
+  plaintext ──── in memory only ────▶│  KDF params      │──▶  *.rbu on disk
   (Zeroizing, wiped on drop)         │  bound as AAD    │
                                      └──────────────────┘
 ```
@@ -154,9 +154,9 @@ This is not ceremony. It's the check that catches a dying USB stick *before* it 
 The output folder is self-describing:
 
 ```
-PreResetBackup_20260811-174233/
+ReBackUp_20260811-174233/
 ├── files/C/Users/you/Desktop/...   mirrored source tree
-├── secrets/*.prb                   Argon2id + AES-256-GCM
+├── secrets/*.rbu                   Argon2id + AES-256-GCM
 ├── manifest.json                   every path, size, SHA-256
 ├── report.html                     self-contained, opens offline
 ├── restore.ps1 / restore.cmd       idempotent restore driver
@@ -169,15 +169,15 @@ PreResetBackup_20260811-174233/
 
 ## Install
 
-Download the `.msi` or NSIS `.exe` from [Releases](https://github.com/Aryansingh0783/pre-reset-backup/releases), or build from source below.
+Download the `.msi` or NSIS `.exe` from [Releases](https://github.com/Aryansingh0783/rebackup/releases), or build from source below.
 
 **Run it as administrator.** Reading the MFT requires it. The app works unelevated but falls back to the slow scanner and says so in the sidebar.
 
 ## Build from source
 
 ```bash
-git clone https://github.com/Aryansingh0783/pre-reset-backup
-cd pre-reset-backup
+git clone https://github.com/Aryansingh0783/rebackup
+cd rebackup
 pnpm install
 pnpm tauri dev        # development, hot reload
 pnpm tauri build      # → src-tauri/target/release/bundle/
@@ -209,7 +209,7 @@ pnpm tauri build      # → src-tauri/target/release/bundle/
 ### Before you reset — three checks, in this order
 
 1. The backup folder is on an external drive, not on `C:`.
-2. `pre-reset-backup.exe verify --manifest <path>` passes **from that external copy**.
+2. `rebackup.exe verify --manifest <path>` passes **from that external copy**.
 3. Your passphrase is written down somewhere that isn't this computer.
 
 ## CLI
@@ -217,10 +217,10 @@ pnpm tauri build      # → src-tauri/target/release/bundle/
 The GUI binary doubles as a small CLI, because `restore.ps1` runs on a machine that may not have a desktop session yet.
 
 ```
-pre-reset-backup                       start the GUI
-pre-reset-backup unseal --in <f.prb> --out <f> [--passphrase <p>]
-pre-reset-backup verify --manifest <manifest.json>
-pre-reset-backup shred  --path <file>
+rebackup                       start the GUI
+rebackup unseal --in <f.prb> --out <f> [--passphrase <p>]
+rebackup verify --manifest <manifest.json>
+rebackup shred  --path <file>
 ```
 
 Omit `--passphrase` and it's read from stdin, keeping it out of the process list and your shell history.
@@ -263,7 +263,7 @@ Found a hole? See [SECURITY.md](SECURITY.md). Please don't attach real manifests
 ## Project layout
 
 ```
-pre-reset-backup/
+rebackup/
 ├── src-tauri/src/
 │   ├── scanner/
 │   │   ├── mft.rs        raw NTFS MFT reader — boot sector, run-lists,

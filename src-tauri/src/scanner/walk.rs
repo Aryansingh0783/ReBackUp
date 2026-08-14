@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn indexes_a_temp_tree() {
-        let dir = std::env::temp_dir().join(format!("prb-walk-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-walk-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("sub")).unwrap();
         let mut f = std::fs::File::create(dir.join("sub").join("a.txt")).unwrap();

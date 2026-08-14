@@ -3014,45 +3014,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pre-reset-backup"
-version = "0.0.0"
-dependencies = [
- "aes-gcm",
- "anyhow",
- "argon2",
- "base64 0.22.1",
- "dirs 5.0.1",
- "globset",
- "hex",
- "ignore",
- "parking_lot",
- "rand",
- "rayon",
- "regex",
- "rusqlite",
- "serde",
- "serde_json",
- "sevenz-rust2",
- "sha2",
- "sysinfo",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-opener",
- "thiserror 2.0.20",
- "time",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "uuid",
- "walkdir",
- "windows 0.58.0",
- "winreg 0.52.0",
- "zeroize",
- "zip",
-]
-
-[[package]]
 name = "precomputed-hash"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3204,6 +3165,45 @@ checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
+]
+
+[[package]]
+name = "rebackup"
+version = "0.0.0"
+dependencies = [
+ "aes-gcm",
+ "anyhow",
+ "argon2",
+ "base64 0.22.1",
+ "dirs 5.0.1",
+ "globset",
+ "hex",
+ "ignore",
+ "parking_lot",
+ "rand",
+ "rayon",
+ "regex",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "sevenz-rust2",
+ "sha2",
+ "sysinfo",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-opener",
+ "thiserror 2.0.20",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+ "walkdir",
+ "windows 0.58.0",
+ "winreg 0.52.0",
+ "zeroize",
+ "zip",
 ]
 
 [[package]]

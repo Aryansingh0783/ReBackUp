@@ -1,4 +1,4 @@
-//! Pre-Reset Backup — library root.
+//! ReBackUp — library root.
 //!
 //! Everything the UI can do goes through a `#[tauri::command]` in this file.
 //! Long-running work (scanning, copying, hashing, compressing) is pushed onto
@@ -416,13 +416,13 @@ fn read_manifest(path: String) -> AppResult<manifest::Manifest> {
 pub fn run() {
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_env("PRB_LOG")
+            tracing_subscriber::EnvFilter::try_from_env("REBACKUP_LOG")
                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
         )
         .with_target(false)
         .init();
 
-    // CLI mode: `pre-reset-backup unseal|verify|shred ...`. Used by restore.ps1
+    // CLI mode: `rebackup unseal|verify|shred ...`. Used by restore.ps1
     // on the fresh install, where there may be no GUI session yet.
     if let Some(code) = cli::maybe_run() {
         std::process::exit(code);

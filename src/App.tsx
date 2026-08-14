@@ -47,7 +47,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-accent" />
             <div>
-              <div className="text-sm font-semibold leading-tight">Pre-Reset Backup</div>
+              <div className="text-sm font-semibold leading-tight">ReBackUp</div>
               <div className="text-[11px] text-slate-500">v{env?.version ?? '…'}</div>
             </div>
           </div>

@@ -1,17 +1,17 @@
 [package]
-name = "pre-reset-backup"
+name = "rebackup"
 version = "0.0.0"
 description = "Selectively back up critical data before a Windows clean install"
-authors = ["pre-reset-backup contributors"]
+authors = ["rebackup contributors"]
 license = "MIT"
-repository = "https://github.com/Aryansingh0783/pre-reset-backup"
+repository = "https://github.com/Aryansingh0783/rebackup"
 # NOTE: edition 2021 (not 2024) is deliberate — see README "Deviations from spec".
 # 2024 requires rustc >= 1.85 and buys us nothing this crate actually uses.
 edition = "2021"
 rust-version = "1.82"
 
 [lib]
-name = "pre_reset_backup_lib"
+name = "rebackup_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

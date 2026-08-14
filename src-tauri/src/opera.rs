@@ -310,7 +310,7 @@ mod tests {
 
     #[test]
     fn prefers_local_state_inside_the_profile_dir() {
-        let tmp = std::env::temp_dir().join(format!("prb-op-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("rbu-op-{}", std::process::id()));
         let profile = tmp.join("Opera GX Stable");
         std::fs::create_dir_all(&profile).unwrap();
         std::fs::write(tmp.join("Local State"), "{}").unwrap();
@@ -328,7 +328,7 @@ mod tests {
 
     #[test]
     fn detects_both_opera_layouts() {
-        let tmp = std::env::temp_dir().join(format!("prb-layout-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("rbu-layout-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&tmp);
 
         // Flat: Login Data directly in the profile root (older Opera).

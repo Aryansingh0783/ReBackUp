@@ -3,7 +3,7 @@
 //! # Ordering matters
 //! 1. **Plan** resolves globs while nothing is being written, so the size
 //!    estimate the user approves is the size they get.
-//! 2. **Stage** copies files into `%TEMP%\PreResetBackup_<ts>\files\...`,
+//! 2. **Stage** copies files into `%TEMP%\ReBackUp_<ts>\files\...`,
 //!    hashing as it copies (one read, not two).
 //! 3. **Seal** runs the secret actions. This happens *after* staging so a
 //!    failure in a browser profile can't strand half-copied files.
@@ -160,7 +160,7 @@ pub fn plan(selection: &BackupSelection, all_profiles: &[Profile]) -> AppResult<
         .as_ref()
         .map(PathBuf::from)
         .unwrap_or_else(std::env::temp_dir)
-        .join(format!("PreResetBackup_{stamp}"));
+        .join(format!("ReBackUp_{stamp}"));
 
     let mut items: Vec<PlanItem> = Vec::new();
     let mut skipped: Vec<SkippedItem> = Vec::new();
@@ -623,7 +623,7 @@ fn run_secret_actions(
             match crate::secrets::seal_file(
                 staging,
                 Path::new(sentry),
-                &format!("secrets/steam-sentry-{i}.prb"),
+                &format!("secrets/steam-sentry-{i}.rbu"),
                 "Steam sentry file",
                 pass,
             ) {
@@ -644,7 +644,7 @@ fn run_secret_actions(
             match crate::secrets::seal_file(
                 staging,
                 Path::new(cred),
-                "secrets/git-credentials.prb",
+                "secrets/git-credentials.rbu",
                 "git-credentials (plaintext tokens)",
                 pass,
             ) {
@@ -660,7 +660,7 @@ fn run_secret_actions(
             match crate::secrets::seal_file(
                 staging,
                 Path::new(key),
-                &format!("secrets/ssh-{name}.prb"),
+                &format!("secrets/ssh-{name}.rbu"),
                 &format!("SSH key {name}"),
                 pass,
             ) {
@@ -814,7 +814,7 @@ mod tests {
 
     #[test]
     fn copy_and_hash_matches_a_separate_hash_pass() {
-        let dir = std::env::temp_dir().join(format!("prb-cp-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-cp-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("in.bin");
         let dst = dir.join("out.bin");
@@ -830,7 +830,7 @@ mod tests {
 
     #[test]
     fn plan_deduplicates_paths_claimed_by_two_profiles() {
-        let dir = std::env::temp_dir().join(format!("prb-plan-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-plan-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         std::fs::write(dir.join("a.txt"), b"hello").unwrap();
         let pat = format!("{}/**", dir.display().to_string().replace('\\', "/"));
@@ -865,7 +865,7 @@ mod tests {
 
     #[test]
     fn explicit_exclusions_override_includes() {
-        let dir = std::env::temp_dir().join(format!("prb-plan2-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("rbu-plan2-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("keep")).unwrap();
         std::fs::create_dir_all(dir.join("drop")).unwrap();
         std::fs::write(dir.join("keep/a.txt"), b"a").unwrap();

@@ -312,11 +312,11 @@ pub fn builtin() -> Vec<Profile> {
     ]
 }
 
-/// `%APPDATA%\pre-reset-backup\profiles.json`
+/// `%APPDATA%\rebackup\profiles.json`
 pub fn config_path() -> PathBuf {
     dirs::config_dir()
         .unwrap_or_else(std::env::temp_dir)
-        .join("pre-reset-backup")
+        .join("rebackup")
         .join("profiles.json")
 }
 

@@ -5,9 +5,9 @@
 //! parsing — one more crate for four flags isn't worth it.
 //!
 //! ```text
-//! pre-reset-backup unseal --in secrets/x.prb --out x.csv [--passphrase P]
-//! pre-reset-backup verify --manifest manifest.json
-//! pre-reset-backup shred  --path x.csv
+//! rebackup unseal --in secrets/x.rbu --out x.csv [--passphrase P]
+//! rebackup verify --manifest manifest.json
+//! rebackup shred  --path x.csv
 //! ```
 //!
 //! When `--passphrase` is omitted the passphrase is read from stdin, which
@@ -41,7 +41,7 @@ pub fn maybe_run() -> Option<i32> {
         "verify" => Some(verify(&args)),
         "shred" => Some(shred(&args)),
         "--version" | "-V" => {
-            println!("pre-reset-backup {}", env!("CARGO_PKG_VERSION"));
+            println!("rebackup {}", env!("CARGO_PKG_VERSION"));
             Some(0)
         }
         "--help" | "-h" | "help" => {
@@ -54,13 +54,13 @@ pub fn maybe_run() -> Option<i32> {
 }
 
 const HELP: &str = "\
-pre-reset-backup — selective pre-clean-install backup
+rebackup — selective pre-clean-install backup
 
 USAGE:
-  pre-reset-backup                       start the GUI
-  pre-reset-backup unseal --in <f.prb> --out <f> [--passphrase <p>]
-  pre-reset-backup verify --manifest <manifest.json>
-  pre-reset-backup shred  --path <file>
+  rebackup                       start the GUI
+  rebackup unseal --in <f.prb> --out <f> [--passphrase <p>]
+  rebackup verify --manifest <manifest.json>
+  rebackup shred  --path <file>
 
 Omitting --passphrase reads it from stdin, which keeps it out of the process
 list. Sealed files are Argon2id + AES-256-GCM; a wrong passphrase and a
@@ -84,7 +84,7 @@ fn unseal(args: &[String]) -> i32 {
             }
             eprintln!("Wrote {} byte(s) to {dst}", plain.len());
             eprintln!("This file is PLAINTEXT. Shred it when you're done:");
-            eprintln!("  pre-reset-backup shred --path \"{dst}\"");
+            eprintln!("  rebackup shred --path \"{dst}\"");
             0
         }
         Err(e) => {
@@ -156,11 +156,11 @@ mod tests {
 
     #[test]
     fn parses_flags_positionally() {
-        let args: Vec<String> = ["unseal", "--in", "a.prb", "--out", "a.csv"]
+        let args: Vec<String> = ["unseal", "--in", "a.rbu", "--out", "a.csv"]
             .iter()
             .map(|s| s.to_string())
             .collect();
-        assert_eq!(flag(&args, "--in").as_deref(), Some("a.prb"));
+        assert_eq!(flag(&args, "--in").as_deref(), Some("a.rbu"));
         assert_eq!(flag(&args, "--out").as_deref(), Some("a.csv"));
         assert_eq!(flag(&args, "--missing"), None);
     }

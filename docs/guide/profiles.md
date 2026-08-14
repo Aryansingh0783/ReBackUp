@@ -29,7 +29,7 @@ Caches are dropped from every profile: `Cache`, `Code Cache`, `GPUCache`, `Shade
 
 ## Custom profiles
 
-Add patterns in the wizard, or edit `%APPDATA%\pre-reset-backup\profiles.json` directly. Your edits are merged over the built-ins by `id`, so upgrading the app keeps your changes and still picks up new built-in profiles.
+Add patterns in the wizard, or edit `%APPDATA%\rebackup\profiles.json` directly. Your edits are merged over the built-ins by `id`, so upgrading the app keeps your changes and still picks up new built-in profiles.
 
 ## Adding a built-in
 
