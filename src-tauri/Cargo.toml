@@ -48,7 +48,7 @@ zeroize = { version = "1.8", features = ["zeroize_derive"] }
 rand = "0.8"
 
 # ---- archiving --------------------------------------------------------------
-zip = { version = "2.2", default-features = false, features = ["deflate", "zstd", "time"] }
+zip = { version = "8.6", default-features = false, features = ["deflate", "zstd", "time"] }
 
 # ---- misc -------------------------------------------------------------------
 time = { version = "0.3", features = ["formatting", "macros", "local-offset"] }
