@@ -369,3 +369,58 @@ td.dim { color: rgb(var(--muted)); }
    without this. The JS anchor handler applies -90px, but a cold load with a
    hash never goes through it. */
 section[id], main[id] { scroll-margin-top: 100px; }
+/* ---------- interactive carousel ---------------------------------------
+   CSS scroll-snap is the base layer so it works with JS disabled or still
+   loading; the JS below only *enhances* it with pointer-drag, momentum and
+   the dots. Never make a carousel that needs JS to scroll at all.        */
+.carousel { position: relative; margin-top: 2.5rem; }
+.carousel-viewport {
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  scrollbar-width: none; -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+          mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  cursor: grab; padding-block: 0.5rem;
+}
+.carousel-viewport::-webkit-scrollbar { display: none; }
+.carousel-viewport.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+.carousel-viewport.is-dragging * { pointer-events: none; user-select: none; }
+.carousel-track { display: flex; gap: 1rem; padding-inline: 0.25rem; width: max-content; }
+.slide {
+  scroll-snap-align: center; flex: 0 0 auto;
+  width: min(78vw, 380px); padding: 1.6rem; border-radius: var(--r-lg);
+  transition: transform 600ms var(--ease-premium), opacity 600ms var(--ease-premium);
+}
+.slide h3 { font-size: var(--t-h3); margin-bottom: 0.5rem; }
+.slide p { color: rgb(var(--muted)); font-size: var(--t-sm); }
+.slide-tag {
+  display: inline-flex; font-family: var(--font-mono); font-size: var(--t-note);
+  letter-spacing: 0.18em; text-transform: uppercase; color: rgb(var(--subtle));
+  margin-bottom: 1rem;
+}
+/* the off-centre slides recede — this is what makes it read as a carousel
+   rather than a row that happens to scroll */
+.slide:not(.is-active) { opacity: 0.45; transform: scale(0.95); }
+@media (hover: none) { .slide:not(.is-active) { opacity: 0.7; transform: none; } }
+
+.slide-figure {
+  height: 132px; border-radius: var(--r-md); margin-bottom: 1.2rem; overflow: hidden;
+  background: linear-gradient(140deg, rgb(var(--elevated) / 0.9), rgb(var(--elevated) / 0.35));
+  border: 1px solid rgb(var(--line) / 0.1); position: relative;
+  display: grid; place-content: center; padding: 1rem;
+}
+.slide-figure pre {
+  margin: 0; font-family: var(--font-mono); font-size: 10px; line-height: 1.7;
+  color: rgb(var(--subtle)); white-space: pre; overflow: hidden;
+}
+.slide-figure .hl { color: rgb(var(--foreground)); }
+
+.carousel-ui { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.carousel-dots { display: flex; gap: 0.4rem; margin-right: auto; }
+.dot {
+  width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
+  background: rgb(var(--line) / 0.25);
+  transition: width 420ms var(--ease-premium), background 420ms var(--ease-premium);
+}
+.dot.is-active { width: 26px; border-radius: var(--r-pill); background: rgb(var(--accent) / 0.85); }
+.carousel-nav { display: flex; gap: 0.5rem; }
+.carousel-nav .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }

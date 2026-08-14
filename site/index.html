@@ -67,6 +67,7 @@ document.documentElement.classList.toggle('dark',dark);}catch(e){}})();
       <a class="nav-link" data-nav-link href="#problem">Problem</a>
       <a class="nav-link" data-nav-link href="#covers">Coverage</a>
       <a class="nav-link" data-nav-link href="#how">How it works</a>
+      <a class="nav-link" data-nav-link href="#inside">Inside</a>
       <a class="nav-link" data-nav-link href="#security">Security</a>
       <a class="nav-link" data-nav-link href="#status">Status</a>
     </nav>
@@ -93,6 +94,7 @@ document.documentElement.classList.toggle('dark',dark);}catch(e){}})();
   <a href="#problem">Problem</a>
   <a href="#covers">Coverage</a>
   <a href="#how">How it works</a>
+  <a href="#inside">Inside</a>
   <a href="#security">Security</a>
   <a href="#status">Status</a>
 </div>
@@ -275,9 +277,104 @@ rebackup shred --path pw.csv</code></pre>
   </div>
 </section>
 
+<!-- ============ carousel ============ -->
+<section class="section wrap" id="inside">
+  <p class="eyebrow" data-reveal>/04 &nbsp; Inside the app</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">Five screens, in order</h2>
+  <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
+    Drag it, throw it, or use the arrow keys. Everything here is a real surface in the app.
+  </p>
+
+  <div class="carousel" data-carousel data-reveal data-delay="140"
+       role="region" aria-roledescription="carousel" aria-label="Application screens">
+    <div class="carousel-viewport" data-carousel-viewport tabindex="0" aria-live="polite">
+      <div class="carousel-track" data-carousel-track>
+
+        <article class="glass slide" data-glow role="group" aria-roledescription="slide" aria-label="1 of 5: Overview">
+          <span class="slide-tag">01 / Overview</span>
+          <div class="slide-figure" aria-hidden="true"><pre>BROWSER PROFILES   <span class="hl">1</span>
+STEAM ACCOUNTS     <span class="hl">6</span>
+REPOS NEEDING BACKUP <span class="hl">4</span>
+STORED CREDENTIALS <span class="hl">10</span>
+
+<span class="hl">! These exist nowhere but</span>
+<span class="hl">  this machine</span></pre></div>
+          <h3>What's at risk</h3>
+          <p>Finds browsers, Steam, repos and stored credentials on launch, then names the repos with work that exists on exactly one disk.</p>
+        </article>
+
+        <article class="glass slide" data-glow role="group" aria-roledescription="slide" aria-label="2 of 5: Scanner">
+          <span class="slide-tag">02 / Scanner</span>
+          <div class="slide-figure" aria-hidden="true"><pre>C:\  <span class="hl">████████████</span>░░░░  1.30 TB
+     Windows    412 GB
+     Users      388 GB
+     <span class="hl">ProgramData 96 GB</span>
+     $Recycle    12 GB
+
+backend: <span class="hl">mft</span>  ·  4.2 s</pre></div>
+          <h3>Treemap + filters</h3>
+          <p>Squarified canvas treemap over the raw MFT index. Filter by extension, size, date, substring or regex; tick anything a profile misses.</p>
+        </article>
+
+        <article class="glass slide" data-glow role="group" aria-roledescription="slide" aria-label="3 of 5: Profiles">
+          <span class="slide-tag">03 / What to keep</span>
+          <div class="slide-figure" aria-hidden="true"><pre><span class="hl">[x]</span> Desktop files
+<span class="hl">[x]</span> Opera GX      ~131 MB
+<span class="hl">[x]</span> Steam            6 acc
+<span class="hl">[x]</span> Git repos        4 dirty
+[ ] Documents      88 GB
+<span class="hl">[x]</span> AI &amp; editor tools
+[ ] Custom globs</pre></div>
+          <h3>Pre-ticked by detection</h3>
+          <p>Only things actually present on the machine are checked. Custom glob patterns cover whatever your layout does differently.</p>
+        </article>
+
+        <article class="glass slide" data-glow role="group" aria-roledescription="slide" aria-label="4 of 5: Review and run">
+          <span class="slide-tag">04 / Review &amp; run</span>
+          <div class="slide-figure" aria-hidden="true"><pre>FILES        <span class="hl">1,284</span>
+SIZE         <span class="hl">3.9 GB</span>
+FREE AT DEST <span class="hl">238 GB</span>
+
+stage  <span class="hl">████████████</span> 100%
+seal   <span class="hl">████████████</span>   9
+verify <span class="hl">████████</span>░░░░  71%</pre></div>
+          <h3>Plan before you commit</h3>
+          <p>Globs resolve while nothing is written, so the size you approve is the size you get. Warns when staging plus an archive won't fit.</p>
+        </article>
+
+        <article class="glass slide" data-glow role="group" aria-roledescription="slide" aria-label="5 of 5: Result">
+          <span class="slide-tag">05 / Result</span>
+          <div class="slide-figure" aria-hidden="true"><pre><span class="hl">BACKUP COMPLETE &amp; VERIFIED</span>
+1,284 files · 3.9 GB
+9 sealed artifacts
+
+manifest.json   <span class="hl">ok</span>
+report.html     <span class="hl">ok</span>
+restore.ps1     <span class="hl">ok</span></pre></div>
+          <h3>Verified, or it says so</h3>
+          <p>Every hash re-checked from disk. If one mismatches the report says <em>do not reset yet</em> — in red, at the top.</p>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="carousel-ui">
+      <div class="carousel-dots" data-carousel-dots role="tablist" aria-label="Choose slide"></div>
+      <div class="carousel-nav">
+        <button class="btn btn-icon" data-carousel-prev aria-label="Previous slide">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="btn btn-icon" data-carousel-next aria-label="Next slide">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ security ============ -->
 <section class="section wrap" id="security">
-  <p class="eyebrow" data-reveal>/04 &nbsp; Security model</p>
+  <p class="eyebrow" data-reveal>/05 &nbsp; Security model</p>
   <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">Both halves, stated plainly</h2>
   <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
     A backup tool that oversells its guarantees is worse than one that undersells them.
@@ -318,7 +415,7 @@ rebackup shred --path pw.csv</code></pre>
 
 <!-- ============ status ============ -->
 <section class="section wrap" id="status">
-  <p class="eyebrow" data-reveal>/05 &nbsp; Project status</p>
+  <p class="eyebrow" data-reveal>/06 &nbsp; Project status</p>
   <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">v0.0.0 — early, and honest about it</h2>
   <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
     Claiming a benchmark nobody ran is how a backup tool loses someone's data and
