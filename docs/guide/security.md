@@ -1,6 +1,6 @@
 # Security model
 
-The full model lives in the repository's [README](https://github.com/YOURNAME/pre-reset-backup#security-model) and [SECURITY.md](https://github.com/YOURNAME/pre-reset-backup/blob/main/SECURITY.md). The short version:
+The full model lives in the repository's [README](https://github.com/Aryansingh0783/pre-reset-backup#security-model) and [SECURITY.md](https://github.com/Aryansingh0783/pre-reset-backup/blob/main/SECURITY.md). The short version:
 
 ## Protected
 

@@ -1,10 +1,10 @@
 [package]
 name = "pre-reset-backup"
-version = "0.1.0"
+version = "0.0.0"
 description = "Selectively back up critical data before a Windows clean install"
 authors = ["pre-reset-backup contributors"]
 license = "MIT"
-repository = "https://github.com/YOURNAME/pre-reset-backup"
+repository = "https://github.com/Aryansingh0783/pre-reset-backup"
 # NOTE: edition 2021 (not 2024) is deliberate — see README "Deviations from spec".
 # 2024 requires rustc >= 1.85 and buys us nothing this crate actually uses.
 edition = "2021"

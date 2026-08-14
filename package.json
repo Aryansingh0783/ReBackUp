@@ -1,7 +1,7 @@
 {
   "name": "pre-reset-backup",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
   "description": "Selectively back up critical data before a Windows clean install. WizTree-style scanner + profile-driven, encrypted backups.",
   "license": "MIT",

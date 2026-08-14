@@ -2,7 +2,7 @@
 
 ## Install
 
-Grab the `.msi` or the NSIS `.exe` from [Releases](https://github.com/YOURNAME/pre-reset-backup/releases), or build it yourself:
+Grab the `.msi` or the NSIS `.exe` from [Releases](https://github.com/Aryansingh0783/pre-reset-backup/releases), or build it yourself:
 
 ```bash
 pnpm install

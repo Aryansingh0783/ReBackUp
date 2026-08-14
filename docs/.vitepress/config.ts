@@ -9,7 +9,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Security', link: '/guide/security' },
-      { text: 'GitHub', link: 'https://github.com/YOURNAME/pre-reset-backup' },
+      { text: 'GitHub', link: 'https://github.com/Aryansingh0783/pre-reset-backup' },
     ],
     sidebar: [
       {

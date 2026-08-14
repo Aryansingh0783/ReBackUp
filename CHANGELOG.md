@@ -6,9 +6,21 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
-## [0.1.0] — 2026-08-11
+## [0.0.0] — 2026-08-14
 
-Initial release.
+First public release. Early — it works, but see "Project status" in the README
+for what has and hasn't been verified yet.
+
+### Fixed during the first real build
+- `OpenProcessToken` is in `Win32::System::Threading`, not `Win32::Security`.
+- `AdjustTokenPrivileges`: `false.into()` was ambiguous across two `Param` impls.
+- `slug()` produced `opera-gx--default` — a single `.replace("--", "-")` pass
+  cannot collapse a run of three or more separators.
+- `glob_root()` dropped a leading `/`, turning absolute POSIX paths relative.
+- **Opera GX profile layout is now detected rather than assumed.** Current
+  Opera GX has migrated to Chrome's `Default\` subfolder while leaving
+  `Local State` in the parent; the flat-layout assumption made a real install
+  report "no saved passwords" and back up nothing.
 
 ### Added
 - Raw NTFS MFT scanner with boot-sector parsing, data-run decoding, update-sequence fixups and `$FILE_NAME`/`$DATA` extraction; parallel directory-walk fallback for non-NTFS, non-elevated and non-Windows cases.
