@@ -61,7 +61,7 @@ sevenz-rust2 = { version = "0.10.0", features = ["compress", "aes256"], optional
 # rusqlite reads Chromium `Login Data` / `Web Data`. `bundled` avoids a system
 # SQLite dependency and pins the amalgamation we test against.
 rusqlite = { version = "0.32", features = ["bundled"] }
-winreg = "0.52"
+winreg = "0.55"
 windows = { version = "0.58", features = [
   "Win32_Foundation",
   "Win32_Storage_FileSystem",
