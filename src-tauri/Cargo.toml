@@ -49,13 +49,13 @@ rand = "0.8"
 
 # ---- archiving --------------------------------------------------------------
 zip = { version = "2.2", default-features = false, features = ["deflate", "zstd", "time"] }
-sevenz-rust = { version = "0.6", features = ["aes256", "compress"], optional = true }
 
 # ---- misc -------------------------------------------------------------------
 time = { version = "0.3", features = ["formatting", "macros", "local-offset"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+sevenz-rust2 = { version = "0.10.0", features = ["compress", "aes256"], optional = true }
 
 [target.'cfg(windows)'.dependencies]
 # rusqlite reads Chromium `Login Data` / `Web Data`. `bundled` avoids a system
@@ -80,9 +80,10 @@ windows = { version = "0.58", features = [
 [features]
 default = ["sevenz"]
 # 7z/LZMA2 + AES-256 archive output. Disable for a smaller build that uses zip+zstd.
-sevenz = ["dep:sevenz-rust"]
+sevenz = []
 # Enables the raw-MFT fast path. Off => always use the walkdir fallback.
 mft = []
+sevenz-rust2 = ["dep:sevenz-rust2"]
 
 [profile.release]
 panic = "abort"

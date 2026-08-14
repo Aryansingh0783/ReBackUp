@@ -717,10 +717,10 @@ fn make_archive(staging: &Path, mode: ArchiveMode, _pass: &SecretString) -> AppR
             // AES-256 with a key derived from the passphrase by 7-Zip's own KDF
             // (SHA-256, 2^19 iterations). The sealed blobs inside stay sealed
             // regardless, so this is defence in depth, not the only layer.
-            sevenz_rust::compress_to_path_encrypted(
+            sevenz_rust2::compress_to_path_encrypted(
                 staging,
                 &dst,
-                sevenz_rust::Password::from(_pass.expose()),
+                sevenz_rust2::Password::from(_pass.expose()),
             )
             .map_err(|e| AppError::Other(format!("7z compression failed: {e}")))?;
             Ok(ArchiveInfo {
