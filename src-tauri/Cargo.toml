@@ -41,7 +41,7 @@ sysinfo = { version = "0.32", default-features = false, features = ["disk", "sys
 # ---- integrity / crypto -----------------------------------------------------
 sha2 = "0.10"
 hex = "0.4"
-base64 = "0.22"
+base64 = "0.23"
 argon2 = "0.5"
 aes-gcm = { version = "0.10", features = ["std"] }
 zeroize = { version = "1.8", features = ["zeroize_derive"] }
