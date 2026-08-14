@@ -1,10 +1,13 @@
 name: Docs
 
+# Manual for now: this deploys to GitHub Pages, which has to be enabled on the
+# repository first (Settings -> Pages -> Source: GitHub Actions). Once it is,
+# uncomment the push trigger below.
 on:
-  push:
-    branches: [main]
-    paths: ['docs/**', '.github/workflows/docs.yml']
   workflow_dispatch:
+  # push:
+  #   branches: [main]
+  #   paths: ['docs/**', '.github/workflows/docs.yml']
 
 permissions:
   contents: read
