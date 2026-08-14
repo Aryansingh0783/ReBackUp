@@ -1,0 +1,218 @@
+/* ==========================================================================
+   motion-kit — vanilla stylesheet
+   --------------------------------------------------------------------------
+   Pairs with motion-kit.js. Load tokens.css and effects.css first:
+
+     <link rel="stylesheet" href="../styles/tokens.css">
+     <link rel="stylesheet" href="../styles/effects.css">
+     <link rel="stylesheet" href="./motion-kit.css">
+     <link rel="stylesheet" href="../styles/reduced-motion.css">
+
+   This file only adds the CSS that the JS toggles.
+   ========================================================================== */
+
+/* ---- Scroll reveal ------------------------------------------------------ */
+[data-reveal] {
+  opacity: 0;
+  filter: blur(10px);
+  transform: translate(var(--mk-from, 0, 28px));
+  transition:
+    opacity 800ms var(--ease-premium),
+    transform 800ms var(--ease-premium),
+    filter 800ms var(--ease-premium);
+  will-change: opacity, transform, filter;
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate(0, 0);
+}
+
+/* ---- Word-by-word headline ---------------------------------------------- */
+.mk-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.mk-word {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0;
+  transition:
+    transform 850ms var(--ease-premium),
+    opacity 850ms var(--ease-premium);
+}
+[data-reveal-text].is-revealed .mk-word {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ---- Tilt --------------------------------------------------------------- */
+[data-tilt] {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* ---- Sticky nav --------------------------------------------------------- */
+[data-nav] {
+  transition:
+    padding 500ms var(--ease-premium),
+    background-color 500ms var(--ease-premium),
+    backdrop-filter 500ms var(--ease-premium);
+}
+[data-nav].is-scrolled {
+  background: rgb(var(--elevated) / 0.86);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgb(var(--line) / 0.14);
+}
+[data-nav-link] {
+  color: rgb(var(--muted));
+  transition: color 300ms var(--ease-premium);
+}
+[data-nav-link].is-active,
+[data-nav-link]:hover {
+  color: rgb(var(--foreground));
+}
+
+/* ---- Scroll progress ---------------------------------------------------- */
+[data-scroll-progress] {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 55;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, rgb(var(--accent-soft)), rgb(var(--accent)), rgb(var(--accent-soft)));
+  /* Slight easing here stands in for the spring in the React version. */
+  transition: transform 120ms var(--ease-premium);
+}
+
+/* ---- Back to top -------------------------------------------------------- */
+[data-back-to-top] {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  color: rgb(var(--foreground));
+  opacity: 0;
+  transform: translateY(18px) scale(0.85);
+  pointer-events: none;
+  transition:
+    opacity 350ms var(--ease-premium),
+    transform 350ms var(--ease-premium);
+}
+[data-back-to-top].is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ---- Hover video -------------------------------------------------------- */
+[data-hover-video] {
+  position: relative;
+  overflow: hidden;
+}
+[data-hover-video] video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-premium);
+}
+[data-hover-video].is-playing video {
+  opacity: 1;
+}
+[data-hover-video] img {
+  transition: transform 900ms var(--ease-premium);
+}
+[data-hover-video]:hover img {
+  transform: scale(1.05);
+}
+
+/* ---- Custom cursor + ambient glow --------------------------------------- */
+.mk-cursor-dot,
+.mk-cursor-ring,
+.mk-mouse-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.mk-cursor-dot {
+  z-index: 70;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 9999px;
+  background: rgb(var(--accent));
+  transition: transform 200ms var(--ease-premium), opacity 200ms;
+}
+.mk-cursor-dot.is-active {
+  opacity: 0;
+}
+.mk-cursor-ring {
+  z-index: 70;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 1px solid rgb(var(--accent) / 0.4);
+  border-radius: 9999px;
+  transition: width 280ms var(--ease-premium), height 280ms var(--ease-premium),
+    margin 280ms var(--ease-premium);
+}
+.mk-cursor-ring.is-active {
+  width: 68px;
+  height: 68px;
+  margin: -34px 0 0 -34px;
+}
+.mk-mouse-glow {
+  z-index: 0;
+  width: 640px;
+  height: 640px;
+  margin: -320px 0 0 -320px;
+  border-radius: 9999px;
+  opacity: 0.5;
+  filter: blur(120px);
+  background: radial-gradient(circle, rgb(var(--accent) / 0.2), transparent 65%);
+}
+
+/* ---- Preloader ---------------------------------------------------------- */
+[data-preloader] {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 1.5rem 2.5rem;
+  background: rgb(var(--surface));
+  transition: transform 900ms var(--ease-curtain);
+}
+[data-preloader].is-done {
+  transform: translateY(-100%);
+}
+[data-preloader-bar] {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: rgb(var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-cursor-dot,
+  .mk-cursor-ring,
+  .mk-mouse-glow {
+    display: none;
+  }
+}

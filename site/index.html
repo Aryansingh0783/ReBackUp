@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ReBackUp — know what you're about to lose</title>
+<meta name="description" content="Scan your drives like WizTree, pick what actually matters, and walk away with a verified, encrypted backup — before you wipe Windows. Open source. Local only." />
+<meta name="theme-color" content="#08080a" />
+<link rel="canonical" href="https://rebackup.netlify.app/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="ReBackUp — know what you're about to lose" />
+<meta property="og:description" content="A WizTree-class NTFS scanner and a profile-driven, verified, encrypted backup — for the hour before you wipe Windows." />
+<meta property="og:url" content="https://rebackup.netlify.app/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23fafafc'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' font-weight='bold' text-anchor='middle' fill='%2308080a'%3ER%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/assets/css/tokens.css" />
+<link rel="stylesheet" href="/assets/css/motion-kit.css" />
+<link rel="stylesheet" href="/assets/css/site.css" />
+
+<!-- Set the theme before first paint. Without this every dark-mode visitor
+     gets a white flash on load. -->
+<script>
+(function(){try{var s=localStorage.getItem('mk-theme');
+var dark=s?s==='dark':!window.matchMedia('(prefers-color-scheme: light)').matches;
+document.documentElement.classList.toggle('dark',dark);}catch(e){}})();
+</script>
+</head>
+<body>
+
+<!-- ============ preloader curtain ============ -->
+<div data-preloader class="preloader" aria-hidden="true">
+  <div class="pre-inner">
+    <span class="pre-name">ReBackUp</span>
+    <span class="pre-count mono"><span data-preloader-count>000</span></span>
+  </div>
+  <div data-preloader-bar class="pre-bar"></div>
+</div>
+
+<div data-scroll-progress class="scroll-progress" aria-hidden="true"></div>
+
+<!-- ============ ambient atmosphere ============ -->
+<div class="atmos" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="grid-overlay"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ============ nav ============ -->
+<header class="nav" data-nav>
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="ReBackUp home">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      <span>ReBackUp</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <span class="nav-pill" aria-hidden="true"></span>
+      <a class="nav-link" data-nav-link href="#problem">Problem</a>
+      <a class="nav-link" data-nav-link href="#covers">Coverage</a>
+      <a class="nav-link" data-nav-link href="#how">How it works</a>
+      <a class="nav-link" data-nav-link href="#security">Security</a>
+      <a class="nav-link" data-nav-link href="#status">Status</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="btn btn-icon" data-theme-toggle aria-label="Toggle colour theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <a class="btn btn-fill" data-magnetic data-ripple href="https://github.com/Aryansingh0783/ReBackUp" target="_blank" rel="noopener">
+        GitHub
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+      </a>
+      <button class="btn btn-icon menu-btn" id="menuOpen" aria-label="Open menu" aria-expanded="false">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <button class="btn btn-icon menu-close" id="menuClose" aria-label="Close menu">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <a href="#problem">Problem</a>
+  <a href="#covers">Coverage</a>
+  <a href="#how">How it works</a>
+  <a href="#security">Security</a>
+  <a href="#status">Status</a>
+</div>
+
+<main id="top">
+
+<!-- ============ hero ============ -->
+<section class="hero wrap" data-parallax>
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow" data-reveal>v0.0.0 · Tauri 2 · Rust · React</p>
+
+      <h1 style="margin-top:1.2rem">
+        <span data-reveal-text>Know what you're</span>
+        <span class="thin" data-reveal-text>about to lose.</span>
+      </h1>
+
+      <p class="lede" style="margin-top:1.8rem" data-reveal data-delay="120">
+        Reinstalling Windows is easy. Remembering what you had is not.
+        ReBackUp reads the NTFS Master File Table directly, finds the things that
+        exist <em>only</em> on this machine, and produces a verified, encrypted
+        backup you can actually restore.
+      </p>
+
+      <div class="hero-cta" style="margin-top:2.2rem" data-reveal data-delay="200">
+        <a class="btn btn-fill" data-magnetic data-ripple href="https://github.com/Aryansingh0783/ReBackUp" target="_blank" rel="noopener">
+          View source
+        </a>
+        <a class="btn btn-outline" data-magnetic data-ripple href="#how">How it works</a>
+        <span class="tiny" style="margin-left:0.5rem">MIT · local-only · no telemetry</span>
+      </div>
+
+      <div class="hero-meta" data-reveal data-delay="280">
+        <div><div class="stat-n mono" data-count="7000" data-suffix="+">0</div><div class="stat-l">Lines of Rust</div></div>
+        <div><div class="stat-n mono" data-count="58">0</div><div class="stat-l">Unit tests</div></div>
+        <div><div class="stat-n mono" data-count="3">0</div><div class="stat-l">OS in CI</div></div>
+        <div><div class="stat-n mono">0</div><div class="stat-l">Bytes uploaded</div></div>
+      </div>
+    </div>
+
+    <div data-reveal data-delay="160">
+      <div class="glass term" data-tilt data-glow>
+        <div class="term-bar">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          <span class="term-title">rebackup.exe — verify</span>
+        </div>
+        <div class="term-body">
+          <span class="term-line"><span class="c">$</span> rebackup verify --manifest E:\ReBackUp_20260814\manifest.json</span>
+          <span class="term-line c">scanning $MFT ......... 2,481,930 records</span>
+          <span class="term-line c">opera gx ............... 142 logins sealed</span>
+          <span class="term-line c">steam .................. 6 accounts, 0 sentry files</span>
+          <span class="term-line c">git .................... 4 repos exist nowhere else</span>
+          <span class="term-line c">argon2id + aes-256-gcm . 9 artifacts</span>
+          <span class="term-line ok">1,284 checked, 1,284 ok</span>
+          <span class="term-line ok">OK — backup is intact.<span class="caret" aria-hidden="true"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ marquee ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">Opera GX passwords</span><span class="marquee-item">Steam sessions</span>
+    <span class="marquee-item">Unpushed git repos</span><span class="marquee-item">SSH keys</span>
+    <span class="marquee-item">Windows credentials</span><span class="marquee-item">VS Code &amp; Cursor</span>
+    <span class="marquee-item">Ollama manifests</span><span class="marquee-item">SHA-256 verified</span>
+    <span class="marquee-item">Opera GX passwords</span><span class="marquee-item">Steam sessions</span>
+    <span class="marquee-item">Unpushed git repos</span><span class="marquee-item">SSH keys</span>
+    <span class="marquee-item">Windows credentials</span><span class="marquee-item">VS Code &amp; Cursor</span>
+    <span class="marquee-item">Ollama manifests</span><span class="marquee-item">SHA-256 verified</span>
+  </div>
+</div>
+
+<!-- ============ problem ============ -->
+<section class="section wrap" id="problem">
+  <p class="eyebrow" data-reveal>/01 &nbsp; The problem</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem;max-width:20ch" data-reveal data-delay="60">
+    It's never the Documents folder.
+  </h2>
+  <p class="lede" style="margin-top:1.5rem" data-reveal data-delay="120">
+    You back up Documents, wipe the disk, and three days later find the things you
+    actually lost. None of it lives where you looked — it's scattered across
+    <span class="mono tiny">%APPDATA%</span>, <span class="mono tiny">%LOCALAPPDATA%</span>,
+    Program Files and the Windows Credential vault, and most of it is encrypted to an
+    account that no longer exists.
+  </p>
+
+  <div class="cards c-3" style="margin-top:3rem">
+    <div class="glass card" data-glow data-reveal>
+      <span class="card-n">01</span>
+      <h3>Saved passwords</h3>
+      <p>Encrypted with DPAPI, bound to the Windows account you're about to delete. Copying the profile folder does not bring them back.</p>
+    </div>
+    <div class="glass card" data-glow data-reveal data-delay="80">
+      <span class="card-n">02</span>
+      <h3>Work that was never pushed</h3>
+      <p>A repo with uncommitted changes, or no remote at all. It exists on exactly one disk, and you're about to format it.</p>
+    </div>
+    <div class="glass card" data-glow data-reveal data-delay="160">
+      <span class="card-n">03</span>
+      <h3>The thousand small things</h3>
+      <p>An SSH key. A <span class="mono">.env</span>. The API token in <span class="mono">.npmrc</span>. Editor settings you spent a year tuning.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ coverage ============ -->
+<section class="section wrap" id="covers">
+  <p class="eyebrow" data-reveal>/02 &nbsp; Coverage</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">What it actually does</h2>
+  <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
+    Not a promise — a description of the code path. Where something won't survive
+    the reset, it says so.
+  </p>
+
+  <div class="glass glass-quiet tbl-wrap" style="margin-top:2.5rem" data-reveal data-delay="140">
+    <table>
+      <thead><tr><th>Target</th><th>What happens</th><th>Restores?</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Opera GX passwords</strong></td><td class="dim"><span class="mono">Local State</span> → DPAPI → AES-256-GCM key → decrypts <span class="mono">Login Data</span> → re-sealed under your passphrase</td><td><span class="pill yes">Yes · CSV import</span></td></tr>
+        <tr><td><strong>Browser profiles</strong></td><td class="dim">Chrome, Edge, Brave, Vivaldi, Firefox — every profile, caches excluded</td><td><span class="pill yes">Tabs · extensions</span></td></tr>
+        <tr><td><strong>Steam</strong></td><td class="dim"><span class="mono">loginusers.vdf</span>, <span class="mono">config.vdf</span>, <span class="mono">ssfn*</span>, <span class="mono">userdata/</span></td><td><span class="pill no">Guard code needed</span></td></tr>
+        <tr><td><strong>Git repositories</strong></td><td class="dim">Every <span class="mono">.git</span> on scanned drives; flags repos with no remote, unpushed commits or dirty trees</td><td><span class="pill yes">Yes</span></td></tr>
+        <tr><td><strong>Git &amp; SSH credentials</strong></td><td class="dim">Sealed, never copied in the clear — and you should rotate them anyway</td><td><span class="pill yes">Yes</span></td></tr>
+        <tr><td><strong>Windows Credentials</strong></td><td class="dim">Full inventory via <span class="mono">CredEnumerateW</span>, plus a guided <span class="mono">.crd</span> export</td><td><span class="pill no">Guided export</span></td></tr>
+        <tr><td><strong>AI &amp; editor tools</strong></td><td class="dim">VS Code, Cursor, Windsurf, Claude Desktop, JetBrains, Ollama, LM Studio</td><td><span class="pill yes">Settings only</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note" style="margin-top:1.5rem" data-reveal>
+    Model weights are excluded on purpose — they're tens of gigabytes and re-downloadable.
+    Manifests are kept so <span class="mono">ollama pull</span> restores the list.
+  </p>
+</section>
+
+<!-- ============ how ============ -->
+<section class="section wrap" id="how">
+  <p class="eyebrow" data-reveal>/03 &nbsp; How it works</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">Five stages, one honest failure mode</h2>
+
+  <div class="steps" style="margin-top:2.5rem">
+    <div class="glass step" data-glow data-reveal>
+      <span class="step-n">01</span>
+      <div><h3>Scan — the MFT fast path</h3>
+      <p><span class="mono">walkdir</span> costs one directory-open plus a stat per file and is dominated by kernel round-trips. The NTFS Master File Table already holds every name, parent pointer, size and timestamp on the volume — so ReBackUp opens <span class="mono">\\.\C:</span> and parses it directly. One long sequential read instead of millions of syscalls. Needs admin; falls back to a parallel walk automatically and tells you it did.</p></div>
+    </div>
+    <div class="glass step" data-glow data-reveal data-delay="60">
+      <span class="step-n">02</span>
+      <div><h3>Choose — profiles, not checkboxes</h3>
+      <p>A profile is a bundle of glob patterns plus optional <em>secret actions</em>. <span class="mono">%ENV%</span> expands at plan time, not definition time, so a profile file is portable between machines. Your edits merge over the built-ins by id, so upgrading keeps them.</p></div>
+    </div>
+    <div class="glass step" data-glow data-reveal data-delay="120">
+      <span class="step-n">03</span>
+      <div><h3>Seal — Argon2id + AES-256-GCM</h3>
+      <p>Decrypted passwords exist only inside <span class="mono">Zeroizing</span> containers, are assembled into a CSV in memory, sealed, and dropped. Nothing secret is ever written to disk in the clear. KDF parameters are authenticated as associated data, so nobody can downgrade <span class="mono">mCostKib</span> to 8 KiB and still decrypt.</p></div>
+    </div>
+    <div class="glass step" data-glow data-reveal data-delay="180">
+      <span class="step-n">04</span>
+      <div><h3>Verify — the step that earns trust</h3>
+      <p>Every file is hashed <em>during</em> the copy, then re-hashed from disk and compared. If anything mismatches, the report says <strong>do not reset yet</strong>. This is the check that catches a dying USB stick before it costs you the data.</p></div>
+    </div>
+    <div class="glass step" data-glow data-reveal data-delay="240">
+      <span class="step-n">05</span>
+      <div><h3>Restore — idempotent by design</h3>
+      <p><span class="mono">restore.ps1</span> reads <span class="mono">manifest.json</span> at run time instead of baking paths in, verifies each hash before writing, and skips files that already match. Re-running after a partial restore is safe and nearly free. It rewrites <span class="mono">\Users\&lt;old&gt;\</span> to your new username automatically.</p></div>
+    </div>
+  </div>
+
+  <div class="glass code" style="margin-top:2rem" data-reveal>
+    <button class="copy" data-copy>COPY</button>
+<pre style="margin:0"><code><span class="c"># after the clean install</span>
+.\restore.ps1 -DryRun          <span class="c"># preview, change nothing</span>
+.\restore.cmd                  <span class="c"># do it (safe to re-run)</span>
+
+rebackup unseal --in secrets\opera-gx-default-passwords.csv.rbu --out pw.csv
+<span class="c"># import in the browser, then destroy the plaintext</span>
+rebackup shred --path pw.csv</code></pre>
+  </div>
+</section>
+
+<!-- ============ security ============ -->
+<section class="section wrap" id="security">
+  <p class="eyebrow" data-reveal>/04 &nbsp; Security model</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">Both halves, stated plainly</h2>
+  <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
+    A backup tool that oversells its guarantees is worse than one that undersells them.
+    Here is what holds, and what doesn't.
+  </p>
+
+  <div class="cards c-2" style="margin-top:2.5rem">
+    <div class="glass card" data-glow data-reveal>
+      <div class="ico" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <h3>What is protected</h3>
+      <p style="margin-top:0.8rem">
+        Secrets live only in <span class="mono">Zeroizing</span> memory, wiped on drop.
+        Sealing happens in memory — only the sealed blob touches disk.
+        Argon2id at 64&nbsp;MiB, AES-256-GCM, KDF parameters authenticated so they can't be downgraded.
+        Types holding secrets have <strong>no <span class="mono">Serialize</span> impl</strong> — they physically cannot reach the UI or the manifest.
+        A manifest audit aborts the run if an unsealed file lands under <span class="mono">secrets/</span>.
+        Wrong passphrase and tampered ciphertext give the <em>same</em> error, deliberately.
+      </p>
+    </div>
+    <div class="glass card" data-glow data-reveal data-delay="80">
+      <div class="ico" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      </div>
+      <h3>What is not</h3>
+      <p style="margin-top:0.8rem">
+        The staging folder is plaintext for everything that isn't a secret — your documents are documents.
+        Shredding is best-effort on an SSD; wear levelling may have already moved the blocks.
+        Lose the passphrase, lose the sealed data — no recovery, no escrow.
+        DPAPI is scoped to your logon session, so another account's profile and an offline disk are both out of reach.
+        Chrome 127+ app-bound encryption is <strong>not</strong> defeated; it's detected, and you're routed to the browser's own export.
+        <span class="mono">ssfn*</span> sentry files are bound to your Windows SID, which changes on reinstall.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ status ============ -->
+<section class="section wrap" id="status">
+  <p class="eyebrow" data-reveal>/05 &nbsp; Project status</p>
+  <h2 style="font-size:var(--t-d2);margin-top:1.2rem" data-reveal data-delay="60">v0.0.0 — early, and honest about it</h2>
+  <p class="lede" style="margin-top:1.2rem" data-reveal data-delay="100">
+    Claiming a benchmark nobody ran is how a backup tool loses someone's data and
+    their trust in the same afternoon. The unverified rows below are marked unverified
+    because they are.
+  </p>
+
+  <div class="glass glass-quiet tbl-wrap" style="margin-top:2.5rem" data-reveal data-delay="140">
+    <table>
+      <thead><tr><th>Check</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">cargo check --all-targets --all-features</td><td><span class="pill yes">Clean</span></td></tr>
+        <tr><td class="mono">cargo clippy -- -D warnings</td><td><span class="pill yes">Clean</span></td></tr>
+        <tr><td class="mono">cargo test --all-features</td><td><span class="pill yes">58 / 58</span></td></tr>
+        <tr><td class="mono">tsc --noEmit</td><td><span class="pill yes">Clean</span></td></tr>
+        <tr><td>CI green on Windows · macOS · Linux</td><td><span class="pill yes">Passing</span></td></tr>
+        <tr><td>Detects real browsers, Steam, repos, credentials</td><td><span class="pill yes">Verified</span></td></tr>
+        <tr><td>MFT scan benchmark on a 1&nbsp;TB NVMe</td><td><span class="pill no">Not measured</span></td></tr>
+        <tr><td>Full restore on a clean Windows 11 VM</td><td><span class="pill no">Not performed</span></td></tr>
+        <tr><td>Encrypted 7z round-trip on a large dataset</td><td><span class="pill no">Not performed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note" style="margin-top:1.5rem" data-reveal>
+    Most useful contribution right now: a verified restore run on a clean VM, with notes.
+    Second most useful: real MFT timings across drive sizes.
+  </p>
+</section>
+
+<!-- ============ cta ============ -->
+<section class="section wrap">
+  <div class="glass glass-strong" style="padding:clamp(2rem,6vw,4.5rem);border-radius:var(--r-xl);text-align:center" data-glow data-reveal>
+    <p class="eyebrow" style="justify-content:center" data-reveal>Before you reset</p>
+    <h2 class="shimmer" style="font-size:var(--t-d1);margin-top:1.2rem;max-width:16ch;margin-inline:auto">
+      Three checks, in this order.
+    </h2>
+    <div style="max-width:52ch;margin:2rem auto 0;text-align:left">
+      <div class="step-n" style="padding:0">01 &nbsp;<span style="color:rgb(var(--muted));font-family:var(--font-sans);letter-spacing:normal">The backup folder is on an external drive, not on <span class="mono">C:</span>.</span></div>
+      <div class="step-n" style="padding:0.6rem 0 0">02 &nbsp;<span style="color:rgb(var(--muted));font-family:var(--font-sans);letter-spacing:normal"><span class="mono">rebackup verify</span> passes <em>from that external copy</em>.</span></div>
+      <div class="step-n" style="padding:0.6rem 0 0">03 &nbsp;<span style="color:rgb(var(--muted));font-family:var(--font-sans);letter-spacing:normal">Your passphrase is written down somewhere that isn't this computer.</span></div>
+    </div>
+    <div class="hero-cta" style="justify-content:center;margin-top:2.5rem">
+      <a class="btn btn-fill" data-magnetic data-ripple href="https://github.com/Aryansingh0783/ReBackUp" target="_blank" rel="noopener">Clone the repo</a>
+      <a class="btn btn-outline" data-magnetic data-ripple href="https://github.com/Aryansingh0783/ReBackUp/releases" target="_blank" rel="noopener">Releases</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ footer ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div style="grid-column:span 2;min-width:min(100%,260px)">
+        <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>ReBackUp</span></a>
+        <p class="tiny" style="margin-top:1rem;max-width:34ch">
+          Scan your drives, pick what matters, walk away with a verified, encrypted
+          backup. Local-only by design — there is no network code in the app.
+        </p>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="https://github.com/Aryansingh0783/ReBackUp" target="_blank" rel="noopener">Source</a>
+        <a href="https://github.com/Aryansingh0783/ReBackUp/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/Aryansingh0783/ReBackUp/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/Aryansingh0783/ReBackUp/issues" target="_blank" rel="noopener">Issues</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="#how">How it works</a>
+        <a href="#security">Security model</a>
+        <a href="https://github.com/Aryansingh0783/ReBackUp/blob/main/SECURITY.md" target="_blank" rel="noopener">SECURITY.md</a>
+        <a href="https://github.com/Aryansingh0783/ReBackUp/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+      </div>
+      <div>
+        <h4>Built with</h4>
+        <span class="tiny" style="display:block">Tauri 2 · Rust 1.82</span>
+        <span class="tiny" style="display:block">React 19 · TypeScript</span>
+        <span class="tiny" style="display:block">Argon2id · AES-256-GCM</span>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <span class="tiny">MIT licensed · © 2026 ReBackUp contributors</span>
+      <span class="tiny mono">NOTHING LEAVES YOUR MACHINE</span>
+    </div>
+  </div>
+</footer>
+
+<button data-back-to-top class="btn btn-icon back-to-top" aria-label="Back to top">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script type="module" src="/assets/js/site.js"></script>
+</body>
+</html>

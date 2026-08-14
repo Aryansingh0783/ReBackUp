@@ -1,0 +1,82 @@
+/* ==========================================================================
+   ReBackUp — design tokens
+   --------------------------------------------------------------------------
+   Token NAMES are the motion-kit contract; the VALUES are ours.
+   The kit ships a warm brown palette — deliberately replaced here with a
+   true neutral ramp so nothing reads as sepia. Accent is white/near-black
+   rather than a hue: the product is a security tool, and a monochrome
+   surface lets the glass and the grain carry all the visual interest.
+
+   Channels are space-separated RGB so every effect can do rgb(var(--x)/0.2).
+   ========================================================================== */
+
+:root {
+  /* ---- Typography ---- */
+  --font-sans:    'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---- Motion (one curve, one timing family — the whole trick) ---- */
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
+  --dur-micro: 320ms;
+  --dur-standard: 800ms;
+
+  /* ---- Type scale (from the design-system sheet) ---- */
+  --t-hero: clamp(2.7rem, 6.2vw, 5.6rem);
+  --t-d1:   clamp(2.2rem, 4.6vw, 3.6rem);
+  --t-d2:   clamp(1.8rem, 3.6vw, 2.9rem);
+  --t-d3:   clamp(1.6rem, 3vw, 2.5rem);
+  --t-h1:   2.25rem;
+  --t-h2:   1.5rem;
+  --t-h3:   1.25rem;
+  --t-t1:   1.05rem;
+  --t-body: 0.95rem;
+  --t-sm:   0.8125rem;
+  --t-pre:  0.6875rem;
+  --t-note: 0.625rem;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  --maxw: 1200px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+}
+
+/* ---- Dark (default) — neutral ramp, zero hue ----
+   NOTE: the motion kit's initTheme() toggles ONLY the `.dark` class, so light
+   has to be the :not(.dark) case. Keying light off a `.light` class means the
+   toggle removes `.dark`, nothing else matches, and dark stays applied. ---- */
+.dark {
+  --surface:    8 8 9;
+  --surface-2:  13 13 15;
+  --elevated:   30 30 34;     /* the colour the glass is "made of" */
+  --foreground: 245 245 247;
+  --muted:      168 168 178;  /* 8.6:1 on --surface */
+  --subtle:     138 138 149;  /* 5.9:1 on --surface — passes at small sizes */
+  --accent:     250 250 252;
+  --accent-soft:150 150 162;
+  --line:       245 245 247;
+  --line-opacity: 0.12;
+  --grain: 0.045;
+  color-scheme: dark;
+}
+
+/* ---- Light ---- */
+:root:not(.dark) {
+  --surface:    250 250 251;
+  --surface-2:  242 242 245;
+  --elevated:   255 255 255;
+  --foreground: 10 10 12;
+  --muted:      82 82 92;     /* 7.4:1 */
+  --subtle:     101 101 112;  /* 5.2:1 */
+  --accent:     16 16 20;
+  --accent-soft:120 120 132;
+  --line:       10 10 12;
+  --line-opacity: 0.10;
+  --grain: 0.028;
+  color-scheme: light;
+}
