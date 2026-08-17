@@ -153,7 +153,7 @@ function initTilt() {
    5. MAGNETIC BUTTONS + RIPPLE
    ------------------------------------------------------------------------- */
 function initMagnetic() {
-  if (!REDUCED) {
+  if (!REDUCED && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     document.querySelectorAll('[data-magnetic]').forEach((el) => {
       const strength = parseFloat(el.dataset.magnetic) || 0.35;
       el.style.transition = `transform 400ms ${EASE}`;

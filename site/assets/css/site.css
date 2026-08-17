@@ -257,7 +257,8 @@ main, header, footer { position: relative; z-index: 1; }
   margin-bottom: 1rem; color: rgb(var(--foreground)); }
 
 /* ---------- table -------------------------------------------------------- */
-.tbl-wrap { border-radius: var(--r-lg); overflow: hidden; }
+.tbl-wrap { border-radius: var(--r-lg); overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+.tbl-wrap table { min-width: 540px; }
 table { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
 th, td { text-align: left; padding: 0.95rem 1.15rem; border-bottom: 1px solid rgb(var(--line) / 0.08); }
 th { font-family: var(--font-mono); font-size: var(--t-pre); letter-spacing: 0.16em;
